@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Array Resources for Chatbox App
+    
+    This file defines arrays used in the application.
+-->
+<resources>
+
+    <!-- Theme Options -->
+    <string-array name="theme_entries">
+        <item>@string/theme_light</item>
+        <item>@string/theme_dark</item>
+        <item>@string/theme_system</item>
+    </string-array>
+
+    <string-array name="theme_values">
+        <item>light</item>
+        <item>dark</item>
+        <item>system</item>
+    </string-array>
+
+    <!-- Language Options -->
+    <string-array name="language_entries">
+        <item>@string/language_system</item>
+        <item>English</item>
+        <item>中文 (Chinese)</item>
+        <item>日本語 (Japanese)</item>
+        <item>한국어 (Korean)</item>
+        <item>Deutsch (German)</item>
+        <item>Français (French)</item>
+        <item>Español (Spanish)</item>
+    </string-array>
+
+    <string-array name="language_values">
+        <item>system</item>
+        <item>en</item>
+        <item>zh</item>
+        <item>ja</item>
+        <item>ko</item>
+        <item>de</item>
+        <item>fr</item>
+        <item>es</item>
+    </string-array>
+
+    <!-- Font Size Options -->
+    <string-array name="font_size_entries">
+        <item>@string/font_size_small</item>
+        <item>@string/font_size_medium</item>
+        <item>@string/font_size_large</item>
+    </string-array>
+
+    <string-array name="font_size_values">
+        <item>12</item>
+        <item>14</item>
+        <item>16</item>
+    </string-array>
+
+    <!-- Provider Options -->
+    <string-array name="provider_entries">
+        <item>@string/provider_openai</item>
+        <item>@string/provider_claude</item>
+        <item>@string/provider_gemini</item>
+        <item>@string/provider_azure</item>
+        <item>@string/provider_deepseek</item>
+        <item>@string/provider_siliconflow</item>
+        <item>@string/provider_ollama</item>
+        <item>@string/provider_groq</item>
+        <item>@string/provider_mistral</item>
+        <item>@string/provider_lmstudio</item>
+        <item>@string/provider_perplexity</item>
+        <item>@string/provider_xai</item>
+        <item>@string/provider_openrouter</item>
+        <item>@string/provider_custom</item>
+    </string-array>
+
+    <string-array name="provider_values">
+        <item>openai</item>
+        <item>claude</item>
+        <item>gemini</item>
+        <item>azure</item>
+        <item>deepseek</item>
+        <item>siliconflow</item>
+        <item>ollama</item>
+        <item>groq</item>
+        <item>mistral-ai</item>
+        <item>lm-studio</item>
+        <item>perplexity</item>
+        <item>xAI</item>
+        <item>openrouter</item>
+        <item>custom</item>
+    </string-array>
+
+</resources>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android Manifest File
+    
+    This file declares the application's components, permissions,
+    and other configuration required by the Android system.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.chatbox.app">
+
+    <!-- =========================================================================
+         Application Permissions
+         ========================================================================= -->
+    
+    <!-- Internet permission for API calls -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- Network state permission for checking connectivity -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- Read external storage for file attachments -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="32" />
+    
+    <!-- Write external storage for exporting chats -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
+        android:maxSdkVersion="28" />
+    
+    <!-- Read media images for Android 13+ -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    
+    <!-- Read media video for Android 13+ -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    
+    <!-- Read media audio for Android 13+ -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    
+    <!-- Vibration permission for notifications -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- =========================================================================
+         Application Declaration
+         ========================================================================= -->
+    <application
+        android:name=".ChatboxApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Chatbox"
+        android:usesCleartextTraffic="false"
+        tools:targetApi="34">
+
+        <!-- =====================================================================
+             Main Activity - Entry Point
+             ===================================================================== -->
+        <activity
+            android:name=".ui.activities.MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- =====================================================================
+             Chat Activity - Chat Interface
+             ===================================================================== -->
+        <activity
+            android:name=".ui.activities.ChatActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.activities.MainActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- =====================================================================
+             Settings Activity - App Settings
+             ===================================================================== -->
+        <activity
+            android:name=".ui.activities.SettingsActivity"
+            android:exported="false"
+            android:label="@string/settings"
+            android:parentActivityName=".ui.activities.MainActivity" />
+
+        <!-- =====================================================================
+             API Configuration Activity - Configure AI Providers
+             ===================================================================== -->
+        <activity
+            android:name=".ui.activities.ApiConfigActivity"
+            android:exported="false"
+            android:label="@string/api_configuration"
+            android:parentActivityName=".ui.activities.SettingsActivity" />
+
+        <!-- =====================================================================
+             Provider Selection Activity - Select AI Provider
+             ===================================================================== -->
+        <activity
+            android:name=".ui.activities.ProviderSelectionActivity"
+            android:exported="false"
+            android:label="@string/select_provider"
+            android:parentActivityName=".ui.activities.ApiConfigActivity" />
+
+        <!-- =====================================================================
+             File Provider - For sharing files
+             ===================================================================== -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+
+</manifest>

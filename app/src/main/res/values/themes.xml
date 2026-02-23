@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Theme Resources for Chatbox App
+    
+    This file defines the themes used in the application.
+    Uses Material Design 3 components and color system.
+-->
+<resources>
+
+    <!-- =====================================================================
+         Base Theme
+         ===================================================================== -->
+    <style name="Theme.Chatbox" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Secondary brand color -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+
+        <!-- Background colors -->
+        <item name="android:colorBackground">@color/background_light</item>
+        <item name="colorSurface">@color/surface_light</item>
+        <item name="colorOnSurface">@color/on_surface_light</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant_light</item>
+
+        <!-- Error colors -->
+        <item name="colorError">@color/error_light</item>
+        <item name="colorOnError">@color/on_error_light</item>
+
+        <!-- Surface variant -->
+        <item name="colorSurfaceVariant">@color/surface_variant_light</item>
+        <item name="colorOutline">@color/outline_light</item>
+
+        <!-- Typography -->
+        <item name="textAppearanceDisplayLarge">@style/TextAppearance.Chatbox.DisplayLarge</item>
+        <item name="textAppearanceDisplayMedium">@style/TextAppearance.Chatbox.DisplayMedium</item>
+        <item name="textAppearanceDisplaySmall">@style/TextAppearance.Chatbox.DisplaySmall</item>
+        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.Chatbox.HeadlineLarge</item>
+        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.Chatbox.HeadlineMedium</item>
+        <item name="textAppearanceHeadlineSmall">@style/TextAppearance.Chatbox.HeadlineSmall</item>
+        <item name="textAppearanceTitleLarge">@style/TextAppearance.Chatbox.TitleLarge</item>
+        <item name="textAppearanceTitleMedium">@style/TextAppearance.Chatbox.TitleMedium</item>
+        <item name="textAppearanceTitleSmall">@style/TextAppearance.Chatbox.TitleSmall</item>
+        <item name="textAppearanceBodyLarge">@style/TextAppearance.Chatbox.BodyLarge</item>
+        <item name="textAppearanceBodyMedium">@style/TextAppearance.Chatbox.BodyMedium</item>
+        <item name="textAppearanceBodySmall">@style/TextAppearance.Chatbox.BodySmall</item>
+        <item name="textAppearanceLabelLarge">@style/TextAppearance.Chatbox.LabelLarge</item>
+        <item name="textAppearanceLabelMedium">@style/TextAppearance.Chatbox.LabelMedium</item>
+        <item name="textAppearanceLabelSmall">@style/TextAppearance.Chatbox.LabelSmall</item>
+
+        <!-- Component styles -->
+        <item name="materialCardViewStyle">@style/Widget.Chatbox.CardView</item>
+        <item name="floatingActionButtonStyle">@style/Widget.Chatbox.FloatingActionButton</item>
+        <item name="toolbarStyle">@style/Widget.Chatbox.Toolbar</item>
+        <item name="appBarLayoutStyle">@style/Widget.Chatbox.AppBar</item>
+
+        <!-- Window insets -->
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowTranslucentNavigation">false</item>
+    </style>
+
+    <!-- =====================================================================
+         AppBar Overlay Theme
+         ===================================================================== -->
+    <style name="Theme.Chatbox.AppBarOverlay" parent="ThemeOverlay.Material3.Dark.ActionBar">
+        <item name="android:background">?attr/colorPrimary</item>
+    </style>
+
+    <!-- =====================================================================
+         Popup Overlay Theme
+         ===================================================================== -->
+    <style name="Theme.Chatbox.PopupOverlay" parent="ThemeOverlay.Material3.Light">
+        <item name="android:background">?attr/colorSurface</item>
+    </style>
+
+    <!-- =====================================================================
+         Typography
+         ===================================================================== -->
+    <style name="TextAppearance.Chatbox.DisplayLarge" parent="TextAppearance.Material3.DisplayLarge">
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.DisplayMedium" parent="TextAppearance.Material3.DisplayMedium">
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.DisplaySmall" parent="TextAppearance.Material3.DisplaySmall">
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.HeadlineLarge" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.HeadlineMedium" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.HeadlineSmall" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.TitleSmall" parent="TextAppearance.Material3.TitleSmall">
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.BodySmall" parent="TextAppearance.Material3.BodySmall">
+        <item name="fontFamily">sans-serif</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.LabelMedium" parent="TextAppearance.Material3.LabelMedium">
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="TextAppearance.Chatbox.LabelSmall" parent="TextAppearance.Material3.LabelSmall">
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+
+    <!-- =====================================================================
+         Component Styles
+         ===================================================================== -->
+    <style name="Widget.Chatbox.CardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="contentPadding">@dimen/card_margin</item>
+    </style>
+
+    <style name="Widget.Chatbox.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="elevation">6dp</item>
+        <item name="pressedTranslationZ">12dp</item>
+    </style>
+
+    <style name="Widget.Chatbox.Toolbar" parent="Widget.Material3.Toolbar.Primary">
+        <item name="titleTextAppearance">@style/TextAppearance.Chatbox.TitleLarge</item>
+        <item name="subtitleTextAppearance">@style/TextAppearance.Chatbox.TitleMedium</item>
+    </style>
+
+    <style name="Widget.Chatbox.AppBar" parent="Widget.Material3.AppBarLayout">
+        <item name="elevation">4dp</item>
+    </style>
+
+    <!-- =====================================================================
+         Message Bubble Styles
+         ===================================================================== -->
+    <style name="MessageBubble">
+        <item name="android:padding">@dimen/message_item_padding</item>
+        <item name="android:layout_margin">@dimen/message_item_margin</item>
+    </style>
+
+    <style name="MessageBubble.User">
+        <item name="android:background">@drawable/bg_message_user</item>
+    </style>
+
+    <style name="MessageBubble.Assistant">
+        <item name="android:background">@drawable/bg_message_assistant</item>
+    </style>
+
+    <!-- =====================================================================
+         Input Styles
+         ===================================================================== -->
+    <style name="Widget.Chatbox.Input" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">@dimen/input_radius</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/input_radius</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/input_radius</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/input_radius</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+    </style>
+
+</resources>

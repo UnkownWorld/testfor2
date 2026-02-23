@@ -1,0 +1,202 @@
+/**
+ * App Module Build Configuration
+ * 
+ * This file configures the Android application module build settings,
+ * dependencies, and compilation options for the Chatbox app.
+ */
+
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    // Application namespace - used for R class and BuildConfig
+    namespace 'com.chatbox.app'
+    
+    // Compile SDK version - the API level used to compile the app
+    compileSdk 34
+
+    // Default configuration for all build variants
+    defaultConfig {
+        // Unique application identifier
+        applicationId "com.chatbox.app"
+        
+        // Minimum API level required to run the app (Android 7.0)
+        minSdk 24
+        
+        // Target API level - the app is designed and tested for this level
+        targetSdk 34
+        
+        // Version code - internal version number for Play Store
+        versionCode 1
+        
+        // Version name - user-visible version string
+        versionName "1.0.0"
+        
+        // Test runner for instrumentation tests
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Build type configurations
+    buildTypes {
+        // Release build configuration
+        release {
+            // Enable code shrinking and obfuscation
+            minifyEnabled false
+            // ProGuard rules file
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        
+        // Debug build configuration
+        debug {
+            // Enable debugging
+            debuggable true
+            // Disable code shrinking for faster builds
+            minifyEnabled false
+        }
+    }
+
+    // Java compilation options
+    compileOptions {
+        // Source compatibility - Java 8 features
+        sourceCompatibility JavaVersion.VERSION_1_8
+        // Target compatibility - Java 8 features
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // View binding configuration - enables type-safe view access
+    buildFeatures {
+        viewBinding true
+    }
+
+    // Packaging options to handle duplicate files
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DUMMY.SF', 'META-INF/DUMMY.RSA']
+        }
+    }
+}
+
+dependencies {
+    // =========================================================================
+    // AndroidX Core Libraries
+    // =========================================================================
+    
+    // AppCompat library for backward compatibility
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    
+    // Material Design components
+    implementation 'com.google.android.material:material:1.11.0'
+    
+    // ConstraintLayout for flexible UI layouts
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    
+    // RecyclerView for efficient list display
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    
+    // CardView for card-based UI
+    implementation 'androidx.cardview:cardview:1.0.0'
+    
+    // SwipeRefreshLayout for pull-to-refresh
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    // =========================================================================
+    // Architecture Components (MVVM)
+    // =========================================================================
+    
+    // ViewModel - UI-related data holder
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.7.0'
+    
+    // LiveData - observable data holder
+    implementation 'androidx.lifecycle:lifecycle-livedata:2.7.0'
+    
+    // Lifecycle extensions
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    
+    // Annotation processor for lifecycle components
+    annotationProcessor 'androidx.lifecycle:lifecycle-compiler:2.7.0'
+
+    // =========================================================================
+    // Room Database (Local Storage)
+    // =========================================================================
+    
+    // Room runtime library
+    implementation 'androidx.room:room-runtime:2.6.1'
+    
+    // Room compiler for annotation processing
+    annotationProcessor 'androidx.room:room-compiler:2.6.1'
+    
+    // Room Kotlin extensions (optional, for coroutines support)
+    implementation 'androidx.room:room-ktx:2.6.1'
+    
+    // Room testing helper
+    testImplementation 'androidx.room:room-testing:2.6.1'
+
+    // =========================================================================
+    // Network Libraries
+    // =========================================================================
+    
+    // Retrofit - type-safe HTTP client
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    
+    // Retrofit Gson converter for JSON parsing
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    
+    // OkHttp - efficient HTTP client
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    
+    // OkHttp logging interceptor for debugging
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    
+    // OkHttp SSE (Server-Sent Events) for streaming
+    implementation 'com.squareup.okhttp3:okhttp-sse:4.12.0'
+
+    // =========================================================================
+    // JSON Processing
+    // =========================================================================
+    
+    // Gson - JSON serialization/deserialization
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // =========================================================================
+    // Image Loading
+    // =========================================================================
+    
+    // Glide - image loading and caching
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
+
+    // =========================================================================
+    // Markdown Rendering
+    // =========================================================================
+    
+    // Markwon - Markdown rendering for Android
+    implementation 'io.noties.markwon:core:4.6.2'
+    implementation 'io.noties.markwon:syntax-highlight:4.6.2'
+    implementation 'io.noties.markwon:ext-tables:4.6.2'
+    implementation 'io.noties.markwon:html:4.6.2'
+    implementation 'io.noties.markwon:linkify:4.6.2'
+
+    // =========================================================================
+    // Utility Libraries
+    // =========================================================================
+    
+    // Apache Commons Lang - utility classes
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    
+    // Apache Commons IO - I/O utilities
+    implementation 'commons-io:commons-io:2.15.1'
+
+    // =========================================================================
+    // Testing Libraries
+    // =========================================================================
+    
+    // JUnit for unit testing
+    testImplementation 'junit:junit:4.13.2'
+    
+    // AndroidX Test core library
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    
+    // Espresso for UI testing
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}

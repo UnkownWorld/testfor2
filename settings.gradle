@@ -1,0 +1,13 @@
+/**
+ * Project Settings Configuration
+ * 
+ * This file defines the project name and included modules.
+ * It is used by Gradle to configure the build.
+ */
+
+// Root project name
+rootProject.name = "Chatbox"
+
+// Included modules
+// The 'app' module contains the main Android application
+include ':app'
