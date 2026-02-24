@@ -9,6 +9,7 @@
     - Input area at the bottom
 -->
 
+
 <androidx.coordinatorlayout.widget.CoordinatorLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -18,6 +19,7 @@
     tools:context=".ui.activities.ChatActivity">
 
     <!-- AppBar with Toolbar -->
+    
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,12 +35,14 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- Main Content -->
+    
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <!-- RecyclerView for Messages -->
+        
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view_messages"
             android:layout_width="match_parent"
@@ -51,6 +55,7 @@
             tools:listitem="@layout/item_message_user" />
 
         <!-- File Attachment Preview -->
+        
         <LinearLayout
             android:id="@+id/file_attachment_layout"
             android:layout_width="match_parent"
@@ -112,6 +117,7 @@
             </LinearLayout>
             
             <!-- Split Info -->
+            
             <TextView
                 android:id="@+id/text_split_info"
                 android:layout_width="wrap_content"
@@ -149,63 +155,77 @@
         </LinearLayout>
 
         <!-- Input Layout -->
+        
         <LinearLayout
             android:id="@+id/input_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorSurface"
             android:elevation="4dp"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:padding="8dp"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <!-- Attach File Button -->
-            <ImageButton
+            <!-- File Selection Button - More Visible -->
+            <Button
                 android:id="@+id/button_attach_file"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="bottom"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/attach_file"
-                android:src="@drawable/ic_add"
-                app:tint="?attr/colorPrimary" />
-
-            <!-- Message Input -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_layout_message"
-                style="@style/Widget.Chatbox.Input"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:hint="@string/type_message"
-                app:endIconMode="none">
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:text="@string/attach_file"
+                android:drawableStart="@drawable/ic_folder"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:layout_marginBottom="8dp"
+                android:minHeight="48dp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edit_message"
-                    android:layout_width="match_parent"
+            <!-- Message Input Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Message Input -->
+                
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/input_layout_message"
+                    style="@style/Widget.Chatbox.Input"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:imeOptions="actionSend"
-                    android:inputType="textMultiLine|textCapSentences"
-                    android:maxLines="5"
-                    android:minHeight="48dp" />
+                    android:layout_weight="1"
+                    android:hint="@string/type_message"
+                    app:endIconMode="none">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionSend"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:maxLines="5"
+                        android:minHeight="48dp" />
 
-            <!-- Send Button -->
-            <ImageButton
-                android:id="@+id/button_send"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="bottom"
-                android:layout_marginStart="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/send"
-                android:src="@drawable/ic_send"
-                app:tint="?attr/colorPrimary" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Send Button -->
+                
+                <ImageButton
+                    android:id="@+id/button_send"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="bottom"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/send"
+                    android:src="@drawable/ic_send"
+                    app:tint="?attr/colorPrimary" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
         <!-- Progress Bar -->
+        
         <ProgressBar
             android:id="@+id/progress_bar"
             android:layout_width="wrap_content"
