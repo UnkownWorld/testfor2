@@ -97,15 +97,6 @@
             android:parentActivityName=".ui.activities.SettingsActivity" />
 
         <!-- =====================================================================
-             Provider Selection Activity - Select AI Provider
-             ===================================================================== -->
-        <activity
-            android:name=".ui.activities.ProviderSelectionActivity"
-            android:exported="false"
-            android:label="@string/select_provider"
-            android:parentActivityName=".ui.activities.ApiConfigActivity" />
-
-        <!-- =====================================================================
              File Provider - For sharing files
              ===================================================================== -->
         <provider
