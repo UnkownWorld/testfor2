@@ -243,4 +243,31 @@
 
     <string name="error">Error</string>
 
+    <!-- File Attachment -->
+    <string name="attach_file">Attach File</string>
+    <string name="remove_file">Remove File</string>
+    <string name="file_attached">File attached</string>
+    <string name="file_removed">File removed</string>
+    <string name="file_read_error">Error reading file</string>
+    <string name="unsupported_file_type">Unsupported file type</string>
+    <string name="split_options">Split Options</string>
+    <string name="select_batch">Select Batch</string>
+    <string name="no_file_attached">No file attached</string>
+    <string name="send_all_content">Send All Content</string>
+    <string name="send_current_batch">Send Current Batch</string>
+    <string name="batch_format">Batch %1$d: %2$s</string>
+    <string name="chapters_detected">%1$d chapters detected</string>
+    <string name="no_chapters_detected">No chapters detected</string>
+    <string name="split_by_chapter">Split by Chapter</string>
+    <string name="split_by_lines">Split by Lines</string>
+    <string name="split_by_chars">Split by Characters</string>
+    <string name="split_by_regex">Custom Regex</string>
+    <string name="batch_size">Batch Size</string>
+    <string name="lines_per_segment">Lines per Segment</string>
+    <string name="chars_per_segment">Characters per Segment</string>
+    <string name="regex_pattern">Regex Pattern</string>
+    <string name="apply_split">Apply</string>
+    <string name="file_content_prefix">[File: %1$s]\n\n</string>
+    <string name="batch_content_prefix">[Batch %1$d/%2$d: %3$s]\n\n</string>
+
 </resources>

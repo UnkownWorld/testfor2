@@ -254,4 +254,31 @@
 
     <string name="error">错误</string>
 
+    <!-- 文件附件 -->
+    <string name="attach_file">添加文件</string>
+    <string name="remove_file">移除文件</string>
+    <string name="file_attached">文件已添加</string>
+    <string name="file_removed">文件已移除</string>
+    <string name="file_read_error">读取文件失败</string>
+    <string name="unsupported_file_type">不支持的文件类型</string>
+    <string name="split_options">分割选项</string>
+    <string name="select_batch">选择批次</string>
+    <string name="no_file_attached">未添加文件</string>
+    <string name="send_all_content">发送全部内容</string>
+    <string name="send_current_batch">发送当前批次</string>
+    <string name="batch_format">第%1$d批: %2$s</string>
+    <string name="chapters_detected">检测到 %1$d 个章节</string>
+    <string name="no_chapters_detected">未检测到章节</string>
+    <string name="split_by_chapter">按章节分割</string>
+    <string name="split_by_lines">按行数分割</string>
+    <string name="split_by_chars">按字符数分割</string>
+    <string name="split_by_regex">自定义正则</string>
+    <string name="batch_size">每批章节数</string>
+    <string name="lines_per_segment">每段行数</string>
+    <string name="chars_per_segment">每段字符数</string>
+    <string name="regex_pattern">正则表达式</string>
+    <string name="apply_split">应用</string>
+    <string name="file_content_prefix">【文件: %1$s】\n\n</string>
+    <string name="batch_content_prefix">【第%1$d/%2$d批: %3$s】\n\n</string>
+
 </resources>
