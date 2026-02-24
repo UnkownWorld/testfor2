@@ -1,6 +1,8 @@
 package com.chatbox.app.ui.viewmodels;
 
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -23,90 +25,35 @@ import java.util.List;
 
 /**
  * ChatViewModel - ViewModel for ChatActivity
- * 
- * This ViewModel manages the UI-related data for the ChatActivity.
- * It handles:
- * - Message sending and receiving
- * - Session management
- * - API communication
- * 
- * @author Chatbox Team
- * @version 1.0.0
- * @since 2024
  */
 public class ChatViewModel extends AndroidViewModel {
     
-    /**
-     * Log tag for debugging
-     */
     private static final String TAG = "ChatViewModel";
     
-    /**
-     * Repository for chat operations
-     */
     private final ChatRepository chatRepository;
-    
-    /**
-     * Repository for settings operations
-     */
     private final SettingsRepository settingsRepository;
-    
-    /**
-     * OpenAI service for API calls
-     */
     private OpenAIService openAIService;
-    
-    /**
-     * Session ID
-     */
     private String sessionId;
-    
-    /**
-     * LiveData for session
-     */
     private LiveData<Session> session;
-    
-    /**
-     * LiveData for messages
-     */
     private LiveData<List<Message>> messages;
     
-    /**
-     * MutableLiveData for loading state
-     */
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
-    
-    /**
-     * MutableLiveData for error messages
-     */
     private final MutableLiveData<String> error = new MutableLiveData<>();
     
-    // =========================================================================
-    // Constructor
-    // =========================================================================
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     
-    /**
-     * Constructor
-     * 
-     * @param application The Application instance
-     */
     public ChatViewModel(@NonNull Application application) {
         super(application);
         Log.d(TAG, "ChatViewModel created");
         
-        // Get database instance
         ChatboxDatabase database = ChatboxDatabase.getInstance(application);
-        
-        // Get preferences
         SettingsPreferences preferences = ((ChatboxApplication) application).getSettingsPreferences();
         
-        // Initialize repositories
         settingsRepository = SettingsRepository.getInstance(
             database.providerSettingsDao(), 
             preferences
         );
         
-        // Initialize chat repository
         chatRepository = ChatRepository.getInstance(
             database.sessionDao(),
             database.messageDao(),
@@ -114,18 +61,10 @@ public class ChatViewModel extends AndroidViewModel {
         );
     }
     
-    /**
-     * Set the session ID
-     * 
-     * @param sessionId The session ID
-     */
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
         
-        // Get session LiveData
         session = chatRepository.getSessionLive(sessionId);
-        
-        // Get messages LiveData
         messages = chatRepository.getMessagesLive(sessionId);
         
         // Initialize OpenAI service
@@ -143,77 +82,61 @@ public class ChatViewModel extends AndroidViewModel {
             
             if (settings != null && settings.isConfigured()) {
                 openAIService = new OpenAIService(settings, settingsRepository.getPreferences().getTimeoutSeconds());
+                chatRepository.setOpenAIService(openAIService);
+                Log.d(TAG, "OpenAIService initialized for provider: " + provider);
             } else {
                 Log.w(TAG, "Provider not configured: " + provider);
+                postError("提供商未配置，请先在设置中配置API密钥");
             }
+        } else {
+            Log.e(TAG, "Session not found: " + sessionId);
+            postError("会话不存在");
         }
     }
     
-    // =========================================================================
     // Getters
-    // =========================================================================
     
-    /**
-     * Get the session LiveData
-     * 
-     * @return LiveData containing the session
-     */
     public LiveData<Session> getSession() {
         return session;
     }
     
-    /**
-     * Get the messages LiveData
-     * 
-     * @return LiveData containing list of messages
-     */
     public LiveData<List<Message>> getMessages() {
         return messages;
     }
     
-    /**
-     * Get loading state LiveData
-     * 
-     * @return LiveData containing loading state
-     */
     public LiveData<Boolean> getIsLoading() {
         return isLoading;
     }
     
-    /**
-     * Get error messages LiveData
-     * 
-     * @return LiveData containing error messages
-     */
     public LiveData<String> getError() {
         return error;
     }
     
-    // =========================================================================
     // Message Operations
-    // =========================================================================
     
     /**
      * Send a message
-     * 
-     * @param content Message content
-     * @param callback Callback for response handling
      */
     public void sendMessage(String content, SendCallback callback) {
         if (sessionId == null) {
-            error.setValue("Session not initialized");
+            String errorMsg = "会话未初始化";
+            postError(errorMsg);
+            callback.onError(errorMsg);
             return;
         }
         
+        // 每次发送消息前检查并初始化OpenAIService
         if (openAIService == null) {
             initializeOpenAIService();
             if (openAIService == null) {
-                error.setValue("Provider not configured");
+                String errorMsg = "API服务未配置，请先在设置中配置提供商";
+                postError(errorMsg);
+                callback.onError(errorMsg);
                 return;
             }
         }
         
-        isLoading.setValue(true);
+        postLoading(true);
         
         chatRepository.sendMessage(sessionId, content, new ChatRepository.ChatCallback() {
             @Override
@@ -228,175 +151,104 @@ public class ChatViewModel extends AndroidViewModel {
             
             @Override
             public void onComplete(ChatResponse response) {
-                isLoading.setValue(false);
+                postLoading(false);
                 callback.onComplete();
             }
             
             @Override
             public void onError(String errorMessage) {
-                isLoading.setValue(false);
-                error.setValue(errorMessage);
+                postLoading(false);
+                postError(errorMessage);
                 callback.onError(errorMessage);
             }
         });
     }
     
     /**
-     * Delete a message
-     * 
-     * @param message The message to delete
+     * 在主线程中设置加载状态
      */
+    private void postLoading(boolean loading) {
+        mainHandler.post(() -> isLoading.setValue(loading));
+    }
+    
+    /**
+     * 在主线程中设置错误消息
+     */
+    private void postError(String errorMsg) {
+        mainHandler.post(() -> error.setValue(errorMsg));
+    }
+    
     public void deleteMessage(Message message) {
         chatRepository.deleteMessage(message);
     }
     
-    /**
-     * Update a message
-     * 
-     * @param message The message to update
-     */
     public void updateMessage(Message message) {
         chatRepository.updateMessage(message);
     }
     
-    /**
-     * Clear all messages in the session
-     */
     public void clearMessages() {
         chatRepository.clearMessages(sessionId);
     }
     
-    // =========================================================================
     // Session Update Operations
-    // =========================================================================
     
-    /**
-     * Update session model
-     * 
-     * @param model The new model ID
-     */
     public void updateSessionModel(String model) {
         Session currentSession = chatRepository.getSession(sessionId);
         if (currentSession != null) {
             currentSession.setModel(model);
             chatRepository.updateSession(currentSession);
-            // Re-initialize OpenAI service
             initializeOpenAIService();
         }
     }
     
-    /**
-     * Update session provider and model
-     * 
-     * @param provider The new provider ID
-     * @param model The new model ID
-     */
     public void updateSessionProvider(String provider, String model) {
         Session currentSession = chatRepository.getSession(sessionId);
         if (currentSession != null) {
             currentSession.setProvider(provider);
             currentSession.setModel(model);
             chatRepository.updateSession(currentSession);
-            // Re-initialize OpenAI service
             initializeOpenAIService();
         }
     }
     
-    // =========================================================================
     // Provider Operations
-    // =========================================================================
     
-    /**
-     * Get configured providers
-     * 
-     * @return List of configured providers
-     */
     public List<ProviderSettings> getConfiguredProviders() {
         return settingsRepository.getConfiguredProviders();
     }
     
     /**
-     * Get models for a provider
-     * 
-     * @param providerId Provider ID
-     * @return List of model IDs
+     * Get models for a provider (from saved models)
      */
     public List<String> getModelsForProvider(String providerId) {
         return settingsRepository.getModelsForProvider(providerId);
     }
     
-    /**
-     * Get provider display name
-     * 
-     * @param providerId Provider ID
-     * @return Display name
-     */
     public String getProviderDisplayName(String providerId) {
         return settingsRepository.getProviderDisplayName(providerId);
     }
     
-    // =========================================================================
     // Settings Access
-    // =========================================================================
     
-    /**
-     * Check if send on Enter is enabled
-     * 
-     * @return true if enabled
-     */
     public boolean isSendOnEnter() {
         return settingsRepository.getPreferences().isSendOnEnter();
     }
     
-    /**
-     * Check if auto-scroll is enabled
-     * 
-     * @return true if enabled
-     */
     public boolean isAutoScroll() {
         return settingsRepository.getPreferences().isAutoScroll();
     }
     
-    /**
-     * Check if streaming responses are enabled
-     * 
-     * @return true if enabled
-     */
     public boolean isStreamingResponses() {
         return settingsRepository.getPreferences().isStreamingResponses();
     }
     
-    // =========================================================================
     // Callback Interface
-    // =========================================================================
     
-    /**
-     * Callback interface for sending messages
-     */
     public interface SendCallback {
-        /**
-         * Called when a content chunk is received
-         * 
-         * @param chunk The content chunk
-         */
         void onChunk(String chunk);
-        
-        /**
-         * Called when the response is complete
-         */
         void onComplete();
-        
-        /**
-         * Called when an error occurs
-         * 
-         * @param error The error message
-         */
         void onError(String error);
     }
-    
-    // =========================================================================
-    // Cleanup
-    // =========================================================================
     
     @Override
     protected void onCleared() {

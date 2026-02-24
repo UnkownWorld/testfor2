@@ -247,4 +247,9 @@
 
     <string name="add">Add</string>
 
+    <string name="fetch_models_failed">Failed to fetch models: %1$s</string>
+    <string name="please_select_at_least_one_model">Please select at least one model</string>
+
+    <string name="error">Error</string>
+
 </resources>

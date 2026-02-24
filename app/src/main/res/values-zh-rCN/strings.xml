@@ -249,4 +249,9 @@
 
     <string name="add">添加</string>
 
+    <string name="fetch_models_failed">获取模型失败: %1$s</string>
+    <string name="please_select_at_least_one_model">请至少选择一个模型</string>
+
+    <string name="error">错误</string>
+
 </resources>

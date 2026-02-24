@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -116,7 +115,6 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         viewModel.getSession().observe(this, session -> {
             if (session != null && getSupportActionBar() != null) {
                 getSupportActionBar().setTitle(session.getDisplayTitle());
-                // 更新副标题显示当前模型
                 updateSubtitle(session);
             }
         });
@@ -135,9 +133,10 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         });
         
+        // 观察错误消息并显示给用户
         viewModel.getError().observe(this, error -> {
             if (error != null && !error.isEmpty()) {
-                Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+                showErrorDialog(error);
             }
         });
     }
@@ -169,9 +168,21 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             
             @Override
             public void onError(String error) {
-                Toast.makeText(ChatActivity.this, error, Toast.LENGTH_LONG).show();
+                // 错误已经在ViewModel中通过LiveData传递，这里不需要额外处理
+                Log.e(TAG, "Send message error: " + error);
             }
         });
+    }
+    
+    /**
+     * 显示错误对话框
+     */
+    private void showErrorDialog(String error) {
+        new MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.error)
+            .setMessage(error)
+            .setPositiveButton(R.string.ok, null)
+            .show();
     }
     
     private void clearChat() {
@@ -191,12 +202,20 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
      */
     private void showSwitchModelDialog() {
         Session session = viewModel.getSession().getValue();
-        if (session == null) return;
+        if (session == null) {
+            showErrorDialog("会话不存在");
+            return;
+        }
         
-        // 获取当前提供商的模型列表
+        // 获取当前提供商的模型列表（从已保存的模型）
         List<String> models = viewModel.getModelsForProvider(session.getProvider());
         if (models.isEmpty()) {
-            Toast.makeText(this, R.string.no_models_found, Toast.LENGTH_SHORT).show();
+            // 如果没有保存的模型，提示用户先配置
+            new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.no_models_found)
+                .setMessage("请先在API配置中选择要使用的模型")
+                .setPositiveButton(R.string.ok, null)
+                .show();
             return;
         }
         
@@ -224,10 +243,13 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
      * 显示切换提供商对话框
      */
     private void showSwitchProviderDialog() {
-        // 获取已配置的提供商列表
         List<ProviderSettings> providers = viewModel.getConfiguredProviders();
         if (providers.isEmpty()) {
-            Toast.makeText(this, R.string.no_provider_configured, Toast.LENGTH_SHORT).show();
+            new MaterialAlertDialogBuilder(this)
+                .setTitle("无可用提供商")
+                .setMessage("请先在设置中配置API提供商")
+                .setPositiveButton(R.string.ok, null)
+                .show();
             return;
         }
         
@@ -358,7 +380,7 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         int itemId = item.getItemId();
         
         if (itemId == android.R.id.home) {
-            onBackPressed();
+            finish();
             return true;
         } else if (itemId == R.id.action_clear) {
             clearChat();

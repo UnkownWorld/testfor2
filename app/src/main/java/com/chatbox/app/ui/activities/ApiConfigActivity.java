@@ -2,8 +2,6 @@ package com.chatbox.app.ui.activities;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -17,10 +15,10 @@ import com.chatbox.app.api.ModelsService;
 import com.chatbox.app.data.entity.ProviderSettings;
 import com.chatbox.app.databinding.ActivityApiConfigBinding;
 import com.chatbox.app.databinding.DialogModelSelectionBinding;
-import com.chatbox.app.databinding.DialogProviderConfigBinding;
 import com.chatbox.app.ui.adapters.ModelSelectionAdapter;
 import com.chatbox.app.ui.viewmodels.ApiConfigViewModel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -64,7 +62,7 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
     }
     
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             finish();
             return true;
@@ -104,25 +102,28 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
     }
     
     private void showProviderConfigDialog(ProviderSettings provider) {
-        DialogProviderConfigBinding dialogBinding = DialogProviderConfigBinding.inflate(getLayoutInflater());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_provider_config, null);
+        
+        TextInputEditText apiKeyInput = dialogView.findViewById(R.id.input_api_key);
+        TextInputEditText apiHostInput = dialogView.findViewById(R.id.input_api_host);
         
         if (provider.getApiKey() != null) {
-            dialogBinding.inputApiKey.setText(provider.getApiKey());
+            apiKeyInput.setText(provider.getApiKey());
         }
         if (provider.getApiHost() != null) {
-            dialogBinding.inputApiHost.setText(provider.getApiHost());
+            apiHostInput.setText(provider.getApiHost());
         } else {
-            dialogBinding.inputApiHost.setText(ProviderSettings.getDefaultHost(provider.getProvider()));
+            apiHostInput.setText(ProviderSettings.getDefaultHost(provider.getProvider()));
         }
         
         new MaterialAlertDialogBuilder(this)
             .setTitle(provider.getDisplayName())
-            .setView(dialogBinding.getRoot())
+            .setView(dialogView)
             .setPositiveButton(R.string.save, (dialog, which) -> {
-                String apiKey = dialogBinding.inputApiKey.getText() != null ? 
-                    dialogBinding.inputApiKey.getText().toString().trim() : "";
-                String apiHost = dialogBinding.inputApiHost.getText() != null ? 
-                    dialogBinding.inputApiHost.getText().toString().trim() : "";
+                String apiKey = apiKeyInput.getText() != null ? 
+                    apiKeyInput.getText().toString().trim() : "";
+                String apiHost = apiHostInput.getText() != null ? 
+                    apiHostInput.getText().toString().trim() : "";
                 
                 if (apiKey.isEmpty()) {
                     Toast.makeText(this, R.string.error_provider_not_configured, Toast.LENGTH_SHORT).show();
@@ -133,16 +134,31 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                 provider.setApiHost(apiHost);
                 viewModel.saveProviderSettings(provider);
                 
-                Toast.makeText(this, R.string.provider_configured, Toast.LENGTH_SHORT).show();
+                // 保存后立即打开模型选择对话框
+                showModelSelectionDialog(provider);
             })
             .setNegativeButton(R.string.cancel, null)
             .setNeutralButton(R.string.select_models, (dialog, which) -> {
-                // Show model selection dialog
+                // 保存设置
+                String apiKey = apiKeyInput.getText() != null ? 
+                    apiKeyInput.getText().toString().trim() : "";
+                String apiHost = apiHostInput.getText() != null ? 
+                    apiHostInput.getText().toString().trim() : "";
+                
+                if (!apiKey.isEmpty()) {
+                    provider.setApiKey(apiKey);
+                    provider.setApiHost(apiHost);
+                    viewModel.saveProviderSettings(provider);
+                }
+                
                 showModelSelectionDialog(provider);
             })
             .show();
     }
     
+    /**
+     * 显示模型选择对话框
+     */
     private void showModelSelectionDialog(ProviderSettings provider) {
         DialogModelSelectionBinding dialogBinding = DialogModelSelectionBinding.inflate(getLayoutInflater());
         
@@ -150,7 +166,7 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
         dialogBinding.recyclerViewModels.setLayoutManager(new LinearLayoutManager(this));
         dialogBinding.recyclerViewModels.setAdapter(adapter);
         
-        // Load currently selected models
+        // 加载已保存的模型
         Set<String> selectedModels = new HashSet<>();
         if (provider.getModelsJson() != null && !provider.getModelsJson().isEmpty()) {
             try {
@@ -165,13 +181,16 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
             }
         }
         
-        // Create dialog
+        // 创建对话框
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this)
             .setTitle(R.string.select_models)
             .setView(dialogBinding.getRoot())
             .setPositiveButton(R.string.save, (dialog, which) -> {
-                // Save selected models
                 List<String> selected = adapter.getSelectedModels();
+                if (selected.isEmpty()) {
+                    Toast.makeText(this, R.string.please_select_at_least_one_model, Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 viewModel.saveCustomModels(provider.getProvider(), selected);
                 Toast.makeText(this, getString(R.string.models_selected, selected.size()), Toast.LENGTH_SHORT).show();
             })
@@ -180,18 +199,20 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
         androidx.appcompat.app.AlertDialog dialog = dialogBuilder.create();
         dialog.show();
         
-        // Fetch models from API
+        // 显示加载状态
         dialogBinding.progressBar.setVisibility(View.VISIBLE);
         dialogBinding.textLoading.setVisibility(View.VISIBLE);
+        dialogBinding.textLoading.setText(R.string.fetching_models);
         dialogBinding.recyclerViewModels.setVisibility(View.GONE);
         
-        // First check if provider is configured
+        // 检查提供商是否已配置
         if (provider.getApiKey() == null || provider.getApiKey().isEmpty()) {
             dialogBinding.progressBar.setVisibility(View.GONE);
             dialogBinding.textLoading.setText(R.string.please_configure_provider);
             return;
         }
         
+        // 从API获取模型
         modelsService.fetchModels(provider, new ModelsService.ModelsCallback() {
             @Override
             public void onSuccess(List<String> models) {
@@ -203,6 +224,8 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                     if (models.isEmpty()) {
                         dialogBinding.textLoading.setText(R.string.no_models_found);
                         dialogBinding.textLoading.setVisibility(View.VISIBLE);
+                        // 加载默认模型
+                        loadDefaultModels(adapter, provider, selectedModels);
                     } else {
                         adapter.setModels(models, selectedModels);
                     }
@@ -212,22 +235,20 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
             @Override
             public void onError(String error) {
                 runOnUiThread(() -> {
+                    Log.e(TAG, "Failed to fetch models: " + error);
                     dialogBinding.progressBar.setVisibility(View.GONE);
-                    dialogBinding.textLoading.setText(getString(R.string.connection_failed) + ": " + error);
+                    dialogBinding.textLoading.setText(getString(R.string.fetch_models_failed, error));
                     dialogBinding.textLoading.setVisibility(View.VISIBLE);
                     
-                    // Load default models on error
-                    List<String> defaultModels = viewModel.getModelsForProvider(provider.getProvider());
-                    if (!defaultModels.isEmpty()) {
-                        adapter.setModels(defaultModels, selectedModels);
-                        dialogBinding.recyclerViewModels.setVisibility(View.VISIBLE);
-                        dialogBinding.textLoading.setVisibility(View.GONE);
-                    }
+                    // 加载默认模型
+                    loadDefaultModels(adapter, provider, selectedModels);
+                    dialogBinding.recyclerViewModels.setVisibility(View.VISIBLE);
+                    dialogBinding.textLoading.setVisibility(View.GONE);
                 });
             }
         });
         
-        // Add custom model button
+        // 添加自定义模型按钮
         dialogBinding.btnAddModel.setOnClickListener(v -> {
             String customModel = dialogBinding.inputCustomModel.getText() != null ?
                 dialogBinding.inputCustomModel.getText().toString().trim() : "";
@@ -238,7 +259,7 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
             }
         });
         
-        // Refresh button
+        // 刷新按钮
         dialogBinding.btnRefreshModels.setOnClickListener(v -> {
             dialogBinding.progressBar.setVisibility(View.VISIBLE);
             dialogBinding.textLoading.setText(R.string.fetching_models);
@@ -257,7 +278,6 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                             dialogBinding.textLoading.setText(R.string.no_models_found);
                             dialogBinding.textLoading.setVisibility(View.VISIBLE);
                         } else {
-                            // Keep current selections
                             Set<String> currentSelected = new HashSet<>(adapter.getSelectedModels());
                             adapter.setModels(models, currentSelected);
                         }
@@ -268,7 +288,7 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                 public void onError(String error) {
                     runOnUiThread(() -> {
                         dialogBinding.progressBar.setVisibility(View.GONE);
-                        dialogBinding.textLoading.setText(getString(R.string.connection_failed) + ": " + error);
+                        dialogBinding.textLoading.setText(getString(R.string.fetch_models_failed, error));
                         dialogBinding.textLoading.setVisibility(View.VISIBLE);
                     });
                 }
@@ -276,17 +296,23 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
         });
     }
     
+    /**
+     * 加载默认模型
+     */
+    private void loadDefaultModels(ModelSelectionAdapter adapter, ProviderSettings provider, Set<String> selectedModels) {
+        List<String> defaultModels = viewModel.getModelsForProvider(provider.getProvider());
+        if (!defaultModels.isEmpty()) {
+            adapter.setModels(defaultModels, selectedModels);
+        }
+    }
+    
     private void showAddCustomProviderDialog() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_custom_provider, null);
         
-        com.google.android.material.textfield.TextInputEditText nameInput = 
-            dialogView.findViewById(R.id.input_provider_name);
-        com.google.android.material.textfield.TextInputEditText hostInput = 
-            dialogView.findViewById(R.id.input_api_host);
-        com.google.android.material.textfield.TextInputEditText keyInput = 
-            dialogView.findViewById(R.id.input_api_key);
-        com.google.android.material.textfield.TextInputEditText modelInput = 
-            dialogView.findViewById(R.id.input_default_model);
+        TextInputEditText nameInput = dialogView.findViewById(R.id.input_provider_name);
+        TextInputEditText hostInput = dialogView.findViewById(R.id.input_api_host);
+        TextInputEditText keyInput = dialogView.findViewById(R.id.input_api_key);
+        TextInputEditText modelInput = dialogView.findViewById(R.id.input_default_model);
         
         new MaterialAlertDialogBuilder(this)
             .setTitle(R.string.add_custom_provider)
@@ -307,10 +333,12 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                 customProvider.setDisplayName(name);
                 customProvider.setApiHost(host);
                 customProvider.setApiKey(key);
-                customProvider.setDefaultModel(model.isEmpty() ? "gpt-3.5-turbo" : model);
+                customProvider.setDefaultModel(model.isEmpty() ? "gpt-4o-mini" : model);
                 
                 viewModel.saveProviderSettings(customProvider);
-                Toast.makeText(this, R.string.provider_configured, Toast.LENGTH_SHORT).show();
+                
+                // 保存后立即打开模型选择对话框
+                showModelSelectionDialog(customProvider);
             })
             .setNegativeButton(R.string.cancel, null)
             .show();

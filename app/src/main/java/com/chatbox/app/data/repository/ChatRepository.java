@@ -1,5 +1,7 @@
 package com.chatbox.app.data.repository;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -20,63 +22,19 @@ import java.util.concurrent.Executors;
 
 /**
  * ChatRepository - Repository for chat operations
- * 
- * This class acts as a single source of truth for chat data.
- * It coordinates between the database (local) and API service (remote).
- * 
- * Responsibilities:
- * - Manage sessions (create, read, update, delete)
- * - Manage messages (create, read, update, delete)
- * - Handle API communication for chat
- * - Coordinate between local and remote data sources
- * 
- * @author Chatbox Team
- * @version 1.0.0
- * @since 2024
  */
 public class ChatRepository {
     
-    /**
-     * Log tag for debugging
-     */
     private static final String TAG = "ChatRepository";
     
-    /**
-     * Singleton instance
-     */
     private static ChatRepository instance;
     
-    /**
-     * Session DAO for database operations
-     */
     private final SessionDao sessionDao;
-    
-    /**
-     * Message DAO for database operations
-     */
     private final MessageDao messageDao;
-    
-    /**
-     * OpenAI service for API calls
-     */
-    private final OpenAIService openAIService;
-    
-    /**
-     * Executor service for background operations
-     */
+    private OpenAIService openAIService;
     private final ExecutorService executor;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     
-    // =========================================================================
-    // Constructor
-    // =========================================================================
-    
-    /**
-     * Private constructor
-     * 
-     * @param sessionDao Session DAO
-     * @param messageDao Message DAO
-     * @param openAIService OpenAI service
-     */
     private ChatRepository(SessionDao sessionDao, MessageDao messageDao, OpenAIService openAIService) {
         this.sessionDao = sessionDao;
         this.messageDao = messageDao;
@@ -84,14 +42,6 @@ public class ChatRepository {
         this.executor = Executors.newSingleThreadExecutor();
     }
     
-    /**
-     * Get the singleton instance
-     * 
-     * @param sessionDao Session DAO
-     * @param messageDao Message DAO
-     * @param openAIService OpenAI service
-     * @return ChatRepository instance
-     */
     public static synchronized ChatRepository getInstance(
             SessionDao sessionDao, 
             MessageDao messageDao, 
@@ -102,18 +52,15 @@ public class ChatRepository {
         return instance;
     }
     
-    // =========================================================================
-    // Session Operations
-    // =========================================================================
-    
     /**
-     * Create a new chat session
-     * 
-     * @param name Session name
-     * @param provider AI provider ID
-     * @param model AI model ID
-     * @return The created session
+     * Set the OpenAI service
      */
+    public void setOpenAIService(OpenAIService service) {
+        this.openAIService = service;
+    }
+    
+    // Session Operations
+    
     public Session createSession(String name, String provider, String model) {
         Log.d(TAG, "Creating session: name=" + name + ", provider=" + provider + ", model=" + model);
         
@@ -131,142 +78,79 @@ public class ChatRepository {
         return session;
     }
     
-    /**
-     * Create a new chat session with default name
-     * 
-     * @param provider AI provider ID
-     * @param model AI model ID
-     * @return The created session
-     */
     public Session createSession(String provider, String model) {
         return createSession("New Chat", provider, model);
     }
     
-    /**
-     * Get a session by ID
-     * 
-     * @param sessionId Session ID
-     * @return The session, or null if not found
-     */
     public Session getSession(String sessionId) {
         return sessionDao.getSessionById(sessionId);
     }
     
-    /**
-     * Get a session by ID (LiveData)
-     * 
-     * @param sessionId Session ID
-     * @return LiveData containing the session
-     */
     public LiveData<Session> getSessionLive(String sessionId) {
         return sessionDao.getSessionByIdLive(sessionId);
     }
     
-    /**
-     * Get all sessions
-     * 
-     * @return List of all sessions
-     */
     public List<Session> getAllSessions() {
         return sessionDao.getAllSessions();
     }
     
-    /**
-     * Get all sessions (LiveData)
-     * 
-     * @return LiveData containing list of sessions
-     */
     public LiveData<List<Session>> getAllSessionsLive() {
         return sessionDao.getAllSessionsLive();
     }
     
-    /**
-     * Update a session
-     * 
-     * @param session The session to update
-     */
     public void updateSession(Session session) {
         session.touch();
         executor.execute(() -> sessionDao.update(session));
     }
     
-    /**
-     * Delete a session
-     * This will also delete all messages in the session
-     * 
-     * @param session The session to delete
-     */
     public void deleteSession(Session session) {
         executor.execute(() -> sessionDao.delete(session));
     }
     
-    /**
-     * Delete a session by ID
-     * 
-     * @param sessionId The session ID to delete
-     */
     public void deleteSession(String sessionId) {
         executor.execute(() -> sessionDao.deleteById(sessionId));
     }
     
-    /**
-     * Set the starred status of a session
-     * 
-     * @param sessionId Session ID
-     * @param starred Starred status
-     */
     public void setSessionStarred(String sessionId, boolean starred) {
         executor.execute(() -> sessionDao.setStarred(sessionId, starred));
     }
     
-    /**
-     * Rename a session
-     * 
-     * @param sessionId Session ID
-     * @param newName New name
-     */
     public void renameSession(String sessionId, String newName) {
         executor.execute(() -> sessionDao.updateName(sessionId, newName, System.currentTimeMillis()));
     }
     
-    // =========================================================================
     // Message Operations
-    // =========================================================================
     
-    /**
-     * Get all messages for a session
-     * 
-     * @param sessionId Session ID
-     * @return List of messages
-     */
     public List<Message> getMessages(String sessionId) {
         return messageDao.getMessagesBySession(sessionId);
     }
     
-    /**
-     * Get all messages for a session (LiveData)
-     * 
-     * @param sessionId Session ID
-     * @return LiveData containing list of messages
-     */
     public LiveData<List<Message>> getMessagesLive(String sessionId) {
         return messageDao.getMessagesBySessionLive(sessionId);
     }
     
     /**
      * Send a message and get AI response
-     * 
-     * @param sessionId Session ID
-     * @param content Message content
-     * @param callback Callback for response handling
      */
     public void sendMessage(String sessionId, String content, ChatCallback callback) {
         executor.execute(() -> {
             try {
+                // Check if OpenAI service is initialized
+                if (openAIService == null) {
+                    postError(callback, "API服务未初始化，请检查提供商配置");
+                    return;
+                }
+                
                 // Get session info
                 Session session = sessionDao.getSessionById(sessionId);
                 if (session == null) {
-                    callback.onError("Session not found");
+                    postError(callback, "会话不存在");
+                    return;
+                }
+                
+                // Check if model is set
+                if (session.getModel() == null || session.getModel().isEmpty()) {
+                    postError(callback, "未设置模型，请先选择要使用的模型");
                     return;
                 }
                 
@@ -300,11 +184,13 @@ public class ChatRepository {
                 // Build request
                 ChatRequest request = buildChatRequest(session, content);
                 
+                Log.d(TAG, "Sending request to API: model=" + session.getModel() + ", provider=" + session.getProvider());
+                
                 // Call API
                 openAIService.chatCompletion(request, new OpenAIService.ChatCallback() {
                     @Override
                     public void onStart() {
-                        callback.onStart();
+                        mainHandler.post(() -> callback.onStart());
                     }
                     
                     @Override
@@ -316,7 +202,7 @@ public class ChatRepository {
                             assistantMessage.getContent(), 
                             System.currentTimeMillis()
                         );
-                        callback.onChunk(chunk);
+                        mainHandler.post(() -> callback.onChunk(chunk));
                     }
                     
                     @Override
@@ -334,33 +220,37 @@ public class ChatRepository {
                         messageDao.update(assistantMessage);
                         sessionDao.updateTimestamp(sessionId, System.currentTimeMillis());
                         
-                        callback.onComplete(response);
+                        mainHandler.post(() -> callback.onComplete(response));
                     }
                     
                     @Override
                     public void onError(String error) {
+                        Log.e(TAG, "API Error: " + error);
                         // Update message with error
                         assistantMessage.setGenerating(false);
                         assistantMessage.setError(error);
                         messageDao.setError(assistantMessage.getId(), error, null);
                         
-                        callback.onError(error);
+                        mainHandler.post(() -> callback.onError(error));
                     }
                 });
                 
             } catch (Exception e) {
                 Log.e(TAG, "Error sending message", e);
-                callback.onError(e.getMessage());
+                postError(callback, "发送消息失败: " + e.getMessage());
             }
         });
     }
     
     /**
+     * Post error to callback on main thread
+     */
+    private void postError(ChatCallback callback, String error) {
+        mainHandler.post(() -> callback.onError(error));
+    }
+    
+    /**
      * Build a chat request from session and user input
-     * 
-     * @param session The session
-     * @param userContent User message content
-     * @return ChatRequest object
      */
     private ChatRequest buildChatRequest(Session session, String userContent) {
         ChatRequest request = new ChatRequest();
@@ -373,7 +263,20 @@ public class ChatRepository {
             messages.add(new ChatRequest.Message("system", session.getSystemPrompt()));
         }
         
-        // Add user message
+        // Add conversation history (if max context messages is set)
+        int maxContext = session.getMaxContextMessages() != null ? session.getMaxContextMessages() : 20;
+        if (maxContext > 0) {
+            List<Message> history = messageDao.getRecentMessages(session.getId(), maxContext);
+            // Reverse to get oldest first
+            for (int i = history.size() - 1; i >= 0; i--) {
+                Message msg = history.get(i);
+                if (!msg.isUser() && !msg.isAssistant()) continue;
+                if (msg.hasError()) continue;
+                messages.add(new ChatRequest.Message(msg.getRole(), msg.getContent()));
+            }
+        }
+        
+        // Add current user message
         messages.add(new ChatRequest.Message("user", userContent));
         
         request.setMessages(messages);
@@ -383,6 +286,9 @@ public class ChatRepository {
         if (session.getTemperature() != null) {
             request.setTemperature(session.getTemperature());
         }
+        if (session.getTopP() != null) {
+            request.setTopP(session.getTopP());
+        }
         if (session.getMaxTokens() != null) {
             request.setMaxTokens(session.getMaxTokens());
         }
@@ -390,30 +296,15 @@ public class ChatRepository {
         return request;
     }
     
-    /**
-     * Delete a message
-     * 
-     * @param message The message to delete
-     */
     public void deleteMessage(Message message) {
         executor.execute(() -> messageDao.delete(message));
     }
     
-    /**
-     * Update a message
-     * 
-     * @param message The message to update
-     */
     public void updateMessage(Message message) {
         message.setUpdatedAt(System.currentTimeMillis());
         executor.execute(() -> messageDao.update(message));
     }
     
-    /**
-     * Clear all messages in a session
-     * 
-     * @param sessionId Session ID
-     */
     public void clearMessages(String sessionId) {
         executor.execute(() -> {
             messageDao.deleteMessagesBySession(sessionId);
@@ -421,48 +312,17 @@ public class ChatRepository {
         });
     }
     
-    // =========================================================================
     // Callback Interface
-    // =========================================================================
     
-    /**
-     * Callback interface for chat operations
-     */
     public interface ChatCallback {
-        /**
-         * Called when the API call starts
-         */
         void onStart();
-        
-        /**
-         * Called when a content chunk is received
-         * 
-         * @param chunk The content chunk
-         */
         void onChunk(String chunk);
-        
-        /**
-         * Called when the response is complete
-         * 
-         * @param response The complete response
-         */
         void onComplete(ChatResponse response);
-        
-        /**
-         * Called when an error occurs
-         * 
-         * @param error The error message
-         */
         void onError(String error);
     }
     
-    // =========================================================================
     // Cleanup
-    // =========================================================================
     
-    /**
-     * Clean up resources
-     */
     public void cleanup() {
         executor.shutdown();
         instance = null;

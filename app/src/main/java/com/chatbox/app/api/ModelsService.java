@@ -18,8 +18,6 @@ import okhttp3.Response;
 
 /**
  * ModelsService - Service for fetching available models from API
- * 
- * This service fetches the list of available models from various AI providers.
  */
 public class ModelsService {
     
@@ -38,9 +36,6 @@ public class ModelsService {
     
     /**
      * Fetch models from provider API
-     * 
-     * @param settings Provider settings
-     * @param callback Callback for results
      */
     public void fetchModels(ProviderSettings settings, ModelsCallback callback) {
         new Thread(() -> {
@@ -73,27 +68,22 @@ public class ModelsService {
             case ProviderSettings.PROVIDER_XAI:
             case ProviderSettings.PROVIDER_DEEPSEEK:
             case ProviderSettings.PROVIDER_SILICONFLOW:
-                // OpenAI-compatible API
                 models = fetchOpenAICompatibleModels(apiHost, apiKey);
                 break;
                 
             case ProviderSettings.PROVIDER_CLAUDE:
-                // Anthropic doesn't have a models endpoint, return default list
                 models = getDefaultClaudeModels();
                 break;
                 
             case ProviderSettings.PROVIDER_GEMINI:
-                // Google Gemini models endpoint
                 models = fetchGeminiModels(apiKey);
                 break;
                 
             case ProviderSettings.PROVIDER_OLLAMA:
-                // Ollama local API
                 models = fetchOllamaModels(apiHost);
                 break;
                 
             case ProviderSettings.PROVIDER_OPENROUTER:
-                // OpenRouter models endpoint
                 models = fetchOpenRouterModels(apiKey);
                 break;
                 
@@ -112,48 +102,96 @@ public class ModelsService {
         return models;
     }
     
-    private String stripTrailingSlash(String url) {
-        if (url != null && url.endsWith("/")) {
-            return url.substring(0, url.length() - 1);
+    private String normalizeApiHost(String apiHost) {
+        if (apiHost == null) return "";
+        
+        // 移除末尾斜杠
+        String url = apiHost.trim();
+        while (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
         }
+        
         return url;
     }
     
     private List<String> fetchOpenAICompatibleModels(String apiHost, String apiKey) throws IOException {
-        String url = stripTrailingSlash(apiHost);
-        if (!url.endsWith("/v1")) {
-            url = url + "/v1";
-        }
-        url = url + "/models";
+        String url = normalizeApiHost(apiHost);
         
-        Request request = new Request.Builder()
+        // 构建模型列表URL - 直接使用 /models 或 /v1/models
+        if (!url.endsWith("/models")) {
+            if (url.contains("/v1")) {
+                // URL已经包含/v1，直接添加/models
+                url = url + "/models";
+            } else {
+                // URL不包含/v1，添加/v1/models
+                url = url + "/v1/models";
+            }
+        }
+        
+        Log.d(TAG, "Fetching models from: " + url);
+        
+        Request.Builder requestBuilder = new Request.Builder()
             .url(url)
-            .addHeader("Authorization", "Bearer " + apiKey)
-            .get()
-            .build();
+            .get();
+        
+        // 添加认证头
+        if (apiKey != null && !apiKey.isEmpty()) {
+            requestBuilder.addHeader("Authorization", "Bearer " + apiKey);
+        }
+        
+        Request request = requestBuilder.build();
         
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                throw new IOException("HTTP " + response.code());
+                String errorBody = response.body() != null ? response.body().string() : "Unknown error";
+                Log.e(TAG, "HTTP " + response.code() + ": " + errorBody);
+                throw new IOException("HTTP " + response.code() + ": " + errorBody);
             }
             
             String body = response.body().string();
-            JsonObject json = gson.fromJson(body, JsonObject.class);
-            JsonArray data = json.getAsJsonArray("data");
+            Log.d(TAG, "Response: " + body);
             
-            List<String> models = new ArrayList<>();
-            for (int i = 0; i < data.size(); i++) {
-                JsonObject model = data.get(i).getAsJsonObject();
-                String id = model.get("id").getAsString();
-                models.add(id);
+            JsonObject json = gson.fromJson(body, JsonObject.class);
+            
+            // 检查是否有data字段（OpenAI格式）
+            if (json.has("data")) {
+                JsonArray data = json.getAsJsonArray("data");
+                List<String> models = new ArrayList<>();
+                for (int i = 0; i < data.size(); i++) {
+                    JsonObject model = data.get(i).getAsJsonObject();
+                    if (model.has("id")) {
+                        String id = model.get("id").getAsString();
+                        models.add(id);
+                    }
+                }
+                return models;
             }
             
-            return models;
+            // 检查是否有models字段（某些API格式）
+            if (json.has("models")) {
+                JsonArray modelsArray = json.getAsJsonArray("models");
+                List<String> models = new ArrayList<>();
+                for (int i = 0; i < modelsArray.size(); i++) {
+                    JsonObject model = modelsArray.get(i).getAsJsonObject();
+                    if (model.has("id")) {
+                        models.add(model.get("id").getAsString());
+                    } else if (model.has("name")) {
+                        models.add(model.get("name").getAsString());
+                    }
+                }
+                return models;
+            }
+            
+            // 如果都没有，返回空列表
+            Log.w(TAG, "No models found in response");
+            return new ArrayList<>();
         }
     }
     
     private List<String> fetchGeminiModels(String apiKey) throws IOException {
         String url = "https://generativelanguage.googleapis.com/v1beta/models?key=" + apiKey;
+        
+        Log.d(TAG, "Fetching Gemini models from: " + url);
         
         Request request = new Request.Builder()
             .url(url)
@@ -173,7 +211,6 @@ public class ModelsService {
             for (int i = 0; i < models.size(); i++) {
                 JsonObject model = models.get(i).getAsJsonObject();
                 String name = model.get("name").getAsString();
-                // Extract model ID from "models/gemini-pro" format
                 if (name.startsWith("models/")) {
                     name = name.substring(7);
                 }
@@ -199,7 +236,9 @@ public class ModelsService {
         if (apiHost == null || apiHost.isEmpty()) {
             apiHost = "http://localhost:11434";
         }
-        String url = stripTrailingSlash(apiHost) + "/api/tags";
+        String url = normalizeApiHost(apiHost) + "/api/tags";
+        
+        Log.d(TAG, "Fetching Ollama models from: " + url);
         
         Request request = new Request.Builder()
             .url(url)
@@ -228,6 +267,8 @@ public class ModelsService {
     
     private List<String> fetchOpenRouterModels(String apiKey) throws IOException {
         String url = "https://openrouter.ai/api/v1/models";
+        
+        Log.d(TAG, "Fetching OpenRouter models");
         
         Request request = new Request.Builder()
             .url(url)
@@ -265,9 +306,6 @@ public class ModelsService {
         return models;
     }
     
-    /**
-     * Callback interface for models fetch
-     */
     public interface ModelsCallback {
         void onSuccess(List<String> models);
         void onError(String error);
