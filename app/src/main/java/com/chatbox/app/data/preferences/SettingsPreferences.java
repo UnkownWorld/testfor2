@@ -84,6 +84,16 @@ public class SettingsPreferences {
     private static final String KEY_FIRST_LAUNCH = "first_launch";
     private static final String KEY_VERSION_CODE = "version_code";
     
+    // Last Used Settings
+    private static final String KEY_LAST_USED_PROVIDER = "last_used_provider";
+    private static final String KEY_LAST_USED_MODEL = "last_used_model";
+    private static final String KEY_LAST_TEMPERATURE = "last_temperature";
+    private static final String KEY_LAST_TOP_P = "last_top_p";
+    private static final String KEY_LAST_MAX_CONTEXT = "last_max_context";
+    private static final String KEY_LAST_MAX_TOKENS = "last_max_tokens";
+    private static final String KEY_LAST_STREAMING = "last_streaming";
+    private static final String KEY_LAST_SYSTEM_PROMPT = "last_system_prompt";
+    
     // =========================================================================
     // Default Values
     // =========================================================================
@@ -585,6 +595,74 @@ public class SettingsPreferences {
      */
     public void setVersionCode(int versionCode) {
         preferences.edit().putInt(KEY_VERSION_CODE, versionCode).apply();
+    }
+    
+    // =========================================================================
+    // Last Used Settings
+    // =========================================================================
+    
+    public String getLastUsedProvider() {
+        return preferences.getString(KEY_LAST_USED_PROVIDER, null);
+    }
+    
+    public void setLastUsedProvider(String provider) {
+        preferences.edit().putString(KEY_LAST_USED_PROVIDER, provider).apply();
+    }
+    
+    public String getLastUsedModel() {
+        return preferences.getString(KEY_LAST_USED_MODEL, null);
+    }
+    
+    public void setLastUsedModel(String model) {
+        preferences.edit().putString(KEY_LAST_USED_MODEL, model).apply();
+    }
+    
+    public float getLastTemperature() {
+        return preferences.getFloat(KEY_LAST_TEMPERATURE, 1.0f);
+    }
+    
+    public void setLastTemperature(float temperature) {
+        preferences.edit().putFloat(KEY_LAST_TEMPERATURE, temperature).apply();
+    }
+    
+    public float getLastTopP() {
+        return preferences.getFloat(KEY_LAST_TOP_P, 1.0f);
+    }
+    
+    public void setLastTopP(float topP) {
+        preferences.edit().putFloat(KEY_LAST_TOP_P, topP).apply();
+    }
+    
+    public int getLastMaxContext() {
+        return preferences.getInt(KEY_LAST_MAX_CONTEXT, 20);
+    }
+    
+    public void setLastMaxContext(int maxContext) {
+        preferences.edit().putInt(KEY_LAST_MAX_CONTEXT, maxContext).apply();
+    }
+    
+    public int getLastMaxTokens() {
+        return preferences.getInt(KEY_LAST_MAX_TOKENS, 4096);
+    }
+    
+    public void setLastMaxTokens(int maxTokens) {
+        preferences.edit().putInt(KEY_LAST_MAX_TOKENS, maxTokens).apply();
+    }
+    
+    public boolean isLastStreaming() {
+        return preferences.getBoolean(KEY_LAST_STREAMING, true);
+    }
+    
+    public void setLastStreaming(boolean streaming) {
+        preferences.edit().putBoolean(KEY_LAST_STREAMING, streaming).apply();
+    }
+    
+    public String getLastSystemPrompt() {
+        return preferences.getString(KEY_LAST_SYSTEM_PROMPT, null);
+    }
+    
+    public void setLastSystemPrompt(String systemPrompt) {
+        preferences.edit().putString(KEY_LAST_SYSTEM_PROMPT, systemPrompt).apply();
     }
     
     // =========================================================================

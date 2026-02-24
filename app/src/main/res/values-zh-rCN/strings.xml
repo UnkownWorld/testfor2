@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    中文字符串资源
+    
+    包含应用中所有用户可见的中文字符串。
+-->
+<resources>
+    
+    <!-- =====================================================================
+         应用信息
+         ===================================================================== -->
+    
+    <string name="app_name">聊天盒子</string>
+    
+    <!-- =====================================================================
+         常用操作
+         ===================================================================== -->
+    
+    <string name="new_chat">新对话</string>
+    <string name="send">发送</string>
+    <string name="cancel">取消</string>
+    <string name="save">保存</string>
+    <string name="delete">删除</string>
+    <string name="edit">编辑</string>
+    <string name="rename">重命名</string>
+    <string name="copy">复制</string>
+    <string name="share">分享</string>
+    <string name="settings">设置</string>
+    <string name="back">返回</string>
+    <string name="close">关闭</string>
+    <string name="done">完成</string>
+    <string name="ok">确定</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="retry">重试</string>
+    <string name="loading">加载中…</string>
+    <string name="search">搜索</string>
+    <string name="more_options">更多选项</string>
+    <string name="clear">清除</string>
+    
+    <!-- =====================================================================
+         主界面
+         ===================================================================== -->
+    
+    <string name="no_chats">暂无对话</string>
+    <string name="no_chats_yet">还没有对话</string>
+    <string name="tap_plus_to_start">点击 + 开始新对话</string>
+    <string name="no_messages_yet">暂无消息</string>
+    <string name="star">收藏</string>
+    <string name="unstar">取消收藏</string>
+    <string name="session_deleted">对话已删除</string>
+    <string name="session_renamed">对话已重命名</string>
+    <string name="session_name">对话名称</string>
+    <string name="rename_session">重命名对话</string>
+    <string name="delete_session">删除对话</string>
+    <string name="delete_session_confirm">删除"%1$s"？</string>
+    <string name="configure_api_first">请先配置API</string>
+    <string name="configure_api_message">请先配置API设置再开始对话。</string>
+    <string name="configure">配置</string>
+    <string name="error_creating_session">创建对话失败</string>
+    <string name="search_coming_soon">搜索功能即将推出</string>
+    
+    <!-- =====================================================================
+         对话界面
+         ===================================================================== -->
+    
+    <string name="type_message">输入消息…</string>
+    <string name="message_sent">消息已发送</string>
+    <string name="message_copied">消息已复制到剪贴板</string>
+    <string name="generating">生成中…</string>
+    <string name="regenerate">重新生成</string>
+    <string name="stop_generating">停止生成</string>
+    <string name="clear_chat">清空对话</string>
+    <string name="clear_chat_confirm">清空此对话中的所有消息？</string>
+    <string name="chat_cleared">对话已清空</string>
+    <string name="copy_message">复制消息</string>
+    <string name="delete_message">删除消息</string>
+    <string name="edit_message">编辑消息</string>
+    <string name="message_deleted">消息已删除</string>
+    <string name="message_updated">消息已更新</string>
+    <string name="error_sending_message">发送消息失败</string>
+    <string name="network_error">网络错误，请检查您的连接。</string>
+    <string name="api_error">API错误，请重试。</string>
+    <string name="rate_limit_error">请求过于频繁，请稍后再试。</string>
+    <string name="invalid_api_key">API密钥无效，请检查您的设置。</string>
+    <string name="model_not_found">模型未找到，请检查您的设置。</string>
+    <string name="context_too_long">上下文过长，请新建对话。</string>
+    
+    <!-- =====================================================================
+         设置界面
+         ===================================================================== -->
+    
+    <string name="general_settings">通用</string>
+    <string name="appearance">外观</string>
+    <string name="theme">主题</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_system">跟随系统</string>
+    <string name="dynamic_colors">动态颜色</string>
+    <string name="dynamic_colors_summary">使用壁纸颜色</string>
+    <string name="language">语言</string>
+    <string name="language_system">跟随系统</string>
+    <string name="language_chinese">简体中文</string>
+    <string name="language_english">English</string>
+    
+    <!-- API设置 -->
+    <string name="api_settings">API设置</string>
+    <string name="api_configuration">API配置</string>
+    <string name="select_provider">选择提供商</string>
+    <string name="default_provider">默认提供商</string>
+    <string name="default_model">默认模型</string>
+    <string name="api_key">API密钥</string>
+    <string name="api_host">API地址</string>
+    <string name="api_key_hint">请输入您的API密钥</string>
+    <string name="api_host_hint">https://api.example.com</string>
+    <string name="test_connection">测试连接</string>
+    <string name="testing_connection">正在测试连接…</string>
+    <string name="connection_successful">连接成功！</string>
+    <string name="connection_failed">连接失败</string>
+    <string name="provider_configured">已配置</string>
+    <string name="provider_not_configured">未配置</string>
+    <string name="no_providers_configured">未配置任何提供商</string>
+    <string name="add_provider">添加提供商</string>
+    <string name="edit_provider">编辑提供商</string>
+    <string name="remove_provider">移除提供商</string>
+    <string name="remove_provider_confirm">移除%1$s的配置？</string>
+    <string name="add_custom_provider">添加自定义提供商</string>
+    <string name="provider_name">提供商名称</string>
+    <string name="provider_name_hint">例如：我的API</string>
+    
+    <!-- 提供商名称 -->
+    <string name="provider_openai">OpenAI</string>
+    <string name="provider_claude">Claude</string>
+    <string name="provider_gemini">Gemini</string>
+    <string name="provider_azure">Azure OpenAI</string>
+    <string name="provider_deepseek">DeepSeek</string>
+    <string name="provider_siliconflow">SiliconFlow</string>
+    <string name="provider_ollama">Ollama</string>
+    <string name="provider_groq">Groq</string>
+    <string name="provider_mistral">Mistral AI</string>
+    <string name="provider_lmstudio">LM Studio</string>
+    <string name="provider_perplexity">Perplexity</string>
+    <string name="provider_xai">xAI</string>
+    <string name="provider_openrouter">OpenRouter</string>
+    <string name="provider_custom">自定义</string>
+    
+    <!-- 对话设置 -->
+    <string name="chat_settings">对话设置</string>
+    <string name="message_display">消息显示</string>
+    <string name="show_timestamp">显示时间戳</string>
+    <string name="show_token_count">显示Token数量</string>
+    <string name="render_markdown">渲染Markdown</string>
+    <string name="code_highlighting">代码高亮</string>
+    <string name="font_size">字体大小</string>
+    <string name="font_size_small">小</string>
+    <string name="font_size_medium">中</string>
+    <string name="font_size_large">大</string>
+    
+    <!-- 行为设置 -->
+    <string name="behavior">行为</string>
+    <string name="send_on_enter">回车发送</string>
+    <string name="auto_scroll">自动滚动到新消息</string>
+    <string name="streaming_responses">流式响应</string>
+    <string name="streaming_summary">实时显示生成的内容</string>
+    
+    <!-- 通知设置 -->
+    <string name="notifications">通知</string>
+    <string name="notifications_enabled">启用通知</string>
+    <string name="sound_enabled">声音</string>
+    <string name="vibration_enabled">振动</string>
+    
+    <!-- 隐私设置 -->
+    <string name="privacy">隐私</string>
+    <string name="analytics_enabled">启用分析</string>
+    <string name="crash_reporting">崩溃报告</string>
+    <string name="clear_data">清除所有数据</string>
+    <string name="clear_data_confirm">这将删除所有对话和设置，此操作无法撤销。</string>
+    <string name="data_cleared">数据已清除</string>
+    
+    <!-- 高级设置 -->
+    <string name="advanced">高级</string>
+    <string name="timeout">API超时</string>
+    <string name="timeout_seconds">%1$d秒</string>
+    <string name="max_retries">最大重试次数</string>
+    <string name="retry_delay">重试延迟</string>
+    <string name="milliseconds">%1$d毫秒</string>
+    
+    <!-- =====================================================================
+         关于
+         ===================================================================== -->
+    
+    <string name="about">关于</string>
+    <string name="version">版本</string>
+    <string name="open_source_licenses">开源许可证</string>
+    <string name="privacy_policy">隐私政策</string>
+    <string name="terms_of_service">服务条款</string>
+    
+    <!-- =====================================================================
+         错误
+         ===================================================================== -->
+    
+    <string name="error_generic">发生错误</string>
+    <string name="error_no_internet">无网络连接</string>
+    <string name="error_timeout">请求超时</string>
+    <string name="error_unknown">未知错误</string>
+    <string name="error_session_not_found">对话未找到</string>
+    <string name="error_provider_not_configured">提供商未配置</string>
+    
+    <!-- 提供商状态 -->
+    <string name="status">状态</string>
+    <string name="configured">已配置</string>
+    <string name="not_configured">未配置</string>
+
+    <!-- 新建对话对话框 -->
+    <string name="select_model">选择模型</string>
+    <string name="chat_name_optional">对话名称（可选）</string>
+    <string name="system_prompt">系统提示词</string>
+    <string name="system_prompt_hint">设置AI的行为和性格</string>
+    <string name="temperature">温度</string>
+    <string name="temperature_hint">控制随机性：0 = 专注，2 = 创意</string>
+    <string name="top_p">Top P</string>
+    <string name="top_p_hint">核采样：0.1 = 专注，1 = 多样</string>
+    <string name="max_context_messages">最大上下文消息数</string>
+    <string name="max_context_hint">包含的历史消息数量</string>
+    <string name="max_tokens">最大输出Token</string>
+    <string name="max_tokens_hint">AI回复的最大长度</string>
+    <string name="streaming_response">流式响应</string>
+    <string name="streaming_response_hint">实时显示生成的内容</string>
+    <string name="create_chat">创建对话</string>
+    <string name="no_provider_configured">未配置提供商</string>
+    <string name="please_configure_provider">请在设置中至少配置一个API提供商。</string>
+    <string name="use_last_settings">使用上次设置</string>
+    <string name="default_model_for_provider">%1$s的默认模型</string>
+
+    <string name="advanced_settings">高级设置</string>
+
+</resources>

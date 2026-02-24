@@ -16,6 +16,7 @@ import com.chatbox.app.data.preferences.SettingsPreferences;
 import com.chatbox.app.data.repository.ChatRepository;
 import com.chatbox.app.data.repository.SettingsRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,11 +27,7 @@ import java.util.List;
  * - Session list management
  * - Session creation and deletion
  * - Provider configuration checking
- * 
- * Architecture:
- * - Uses AndroidViewModel to access Application context
- * - Communicates with repositories for data operations
- * - Exposes LiveData for UI observation
+ * - Last used settings persistence
  * 
  * @author Chatbox Team
  * @version 1.0.0
@@ -38,101 +35,152 @@ import java.util.List;
  */
 public class MainViewModel extends AndroidViewModel {
     
-    /**
-     * Log tag for debugging
-     */
     private static final String TAG = "MainViewModel";
     
-    /**
-     * Repository for chat operations
-     */
     private final ChatRepository chatRepository;
-    
-    /**
-     * Repository for settings operations
-     */
     private final SettingsRepository settingsRepository;
+    private final SettingsPreferences preferences;
     
-    /**
-     * LiveData for session list
-     */
     private final LiveData<List<Session>> sessions;
-    
-    /**
-     * MutableLiveData for error messages
-     */
     private final MutableLiveData<String> error = new MutableLiveData<>();
-    
-    /**
-     * MutableLiveData for loading state
-     */
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     
-    // =========================================================================
-    // Constructor
-    // =========================================================================
-    
-    /**
-     * Constructor
-     * 
-     * @param application The Application instance
-     */
     public MainViewModel(@NonNull Application application) {
         super(application);
         Log.d(TAG, "MainViewModel created");
         
-        // Get database instance
         ChatboxDatabase database = ChatboxDatabase.getInstance(application);
+        preferences = ((ChatboxApplication) application).getSettingsPreferences();
         
-        // Get preferences
-        SettingsPreferences preferences = ((ChatboxApplication) application).getSettingsPreferences();
-        
-        // Initialize repositories
         settingsRepository = SettingsRepository.getInstance(
             database.providerSettingsDao(), 
             preferences
         );
         
-        // Initialize chat repository (will be properly initialized when needed)
         chatRepository = ChatRepository.getInstance(
             database.sessionDao(),
             database.messageDao(),
-            null // Will be set when provider is selected
+            null
         );
         
-        // Get sessions LiveData
         sessions = chatRepository.getAllSessionsLive();
     }
     
-    // =========================================================================
-    // Getters
-    // =========================================================================
-    
-    /**
-     * Get the session list LiveData
-     * 
-     * @return LiveData containing list of sessions
-     */
     public LiveData<List<Session>> getSessions() {
         return sessions;
     }
     
-    /**
-     * Get error messages LiveData
-     * 
-     * @return LiveData containing error messages
-     */
     public LiveData<String> getError() {
         return error;
     }
     
-    /**
-     * Get loading state LiveData
-     * 
-     * @return LiveData containing loading state
-     */
     public LiveData<Boolean> getIsLoading() {
         return isLoading;
+    }
+    
+    // =========================================================================
+    // Provider Operations
+    // =========================================================================
+    
+    /**
+     * Get list of configured providers
+     */
+    public List<ProviderSettings> getConfiguredProviders() {
+        List<ProviderSettings> allProviders = settingsRepository.getAllProviders();
+        List<ProviderSettings> configured = new ArrayList<>();
+        
+        for (ProviderSettings provider : allProviders) {
+            if (provider.isConfigured()) {
+                configured.add(provider);
+            }
+        }
+        
+        return configured;
+    }
+    
+    /**
+     * Get models for a specific provider
+     */
+    public List<String> getModelsForProvider(String providerId) {
+        return settingsRepository.getModelsForProvider(providerId);
+    }
+    
+    /**
+     * Get last used provider
+     */
+    public ProviderSettings getLastUsedProvider() {
+        String lastProviderId = preferences.getLastUsedProvider();
+        if (lastProviderId != null && !lastProviderId.isEmpty()) {
+            return settingsRepository.getProviderSettings(lastProviderId);
+        }
+        
+        // Return first configured provider
+        List<ProviderSettings> configured = getConfiguredProviders();
+        return configured.isEmpty() ? null : configured.get(0);
+    }
+    
+    /**
+     * Get last used model
+     */
+    public String getLastUsedModel() {
+        return preferences.getLastUsedModel();
+    }
+    
+    /**
+     * Get last used temperature
+     */
+    public float getLastTemperature() {
+        return preferences.getLastTemperature();
+    }
+    
+    /**
+     * Get last used Top P
+     */
+    public float getLastTopP() {
+        return preferences.getLastTopP();
+    }
+    
+    /**
+     * Get last used max context
+     */
+    public int getLastMaxContext() {
+        return preferences.getLastMaxContext();
+    }
+    
+    /**
+     * Get last used max tokens
+     */
+    public int getLastMaxTokens() {
+        return preferences.getLastMaxTokens();
+    }
+    
+    /**
+     * Get last used streaming setting
+     */
+    public boolean isLastStreaming() {
+        return preferences.isLastStreaming();
+    }
+    
+    /**
+     * Get last used system prompt
+     */
+    public String getLastSystemPrompt() {
+        return preferences.getLastSystemPrompt();
+    }
+    
+    /**
+     * Save last used settings
+     */
+    public void saveLastSettings(String provider, String model, float temperature, 
+            float topP, int maxContext, int maxTokens, boolean streaming, String systemPrompt) {
+        preferences.setLastUsedProvider(provider);
+        preferences.setLastUsedModel(model);
+        preferences.setLastTemperature(temperature);
+        preferences.setLastTopP(topP);
+        preferences.setLastMaxContext(maxContext);
+        preferences.setLastMaxTokens(maxTokens);
+        preferences.setLastStreaming(streaming);
+        preferences.setLastSystemPrompt(systemPrompt);
     }
     
     // =========================================================================
@@ -140,27 +188,31 @@ public class MainViewModel extends AndroidViewModel {
     // =========================================================================
     
     /**
-     * Create a new chat session
-     * Uses the default provider and model from settings
-     * 
-     * @return The created session, or null if creation failed
+     * Create a new chat session with specified settings
      */
-    public Session createSession() {
-        Log.d(TAG, "Creating new session");
-        
-        String provider = settingsRepository.getDefaultProvider();
-        String model = settingsRepository.getDefaultModel();
-        
-        // Check if provider is configured
-        ProviderSettings providerSettings = settingsRepository.getProviderSettings(provider);
-        if (providerSettings == null || !providerSettings.isConfigured()) {
-            Log.w(TAG, "Default provider not configured: " + provider);
-            error.setValue("Please configure API settings first");
-            return null;
-        }
+    public Session createSession(String name, String provider, String model,
+            String systemPrompt, float temperature, float topP, 
+            int maxContext, int maxTokens, boolean streaming) {
+        Log.d(TAG, "Creating new session with provider: " + provider + ", model: " + model);
         
         try {
-            Session session = chatRepository.createSession(provider, model);
+            Session session = chatRepository.createSession(
+                name != null ? name : "New Chat", 
+                provider, 
+                model
+            );
+            
+            // Set session parameters
+            session.setSystemPrompt(systemPrompt);
+            session.setTemperature(temperature);
+            session.setTopP(topP);
+            session.setMaxContextMessages(maxContext);
+            session.setMaxTokens(maxTokens);
+            session.setStreamingEnabled(streaming);
+            
+            // Update session in database
+            chatRepository.updateSession(session);
+            
             Log.d(TAG, "Session created: " + session.getId());
             return session;
         } catch (Exception e) {
@@ -171,10 +223,34 @@ public class MainViewModel extends AndroidViewModel {
     }
     
     /**
-     * Delete a session
-     * 
-     * @param session The session to delete
+     * Create a simple session (backward compatibility)
      */
+    public Session createSession() {
+        ProviderSettings lastProvider = getLastUsedProvider();
+        if (lastProvider == null) {
+            error.setValue("Please configure API settings first");
+            return null;
+        }
+        
+        String model = getLastUsedModel();
+        if (model == null || model.isEmpty()) {
+            List<String> models = getModelsForProvider(lastProvider.getProvider());
+            model = models.isEmpty() ? "gpt-3.5-turbo" : models.get(0);
+        }
+        
+        return createSession(
+            null,
+            lastProvider.getProvider(),
+            model,
+            getLastSystemPrompt(),
+            getLastTemperature(),
+            getLastTopP(),
+            getLastMaxContext(),
+            getLastMaxTokens(),
+            isLastStreaming()
+        );
+    }
+    
     public void deleteSession(Session session) {
         Log.d(TAG, "Deleting session: " + session.getId());
         try {
@@ -185,11 +261,6 @@ public class MainViewModel extends AndroidViewModel {
         }
     }
     
-    /**
-     * Toggle the starred status of a session
-     * 
-     * @param session The session to toggle
-     */
     public void toggleStarred(Session session) {
         Log.d(TAG, "Toggling starred for session: " + session.getId());
         try {
@@ -200,12 +271,6 @@ public class MainViewModel extends AndroidViewModel {
         }
     }
     
-    /**
-     * Rename a session
-     * 
-     * @param session The session to rename
-     * @param newName The new name
-     */
     public void renameSession(Session session, String newName) {
         Log.d(TAG, "Renaming session " + session.getId() + " to: " + newName);
         try {
@@ -216,51 +281,22 @@ public class MainViewModel extends AndroidViewModel {
         }
     }
     
-    /**
-     * Refresh the session list
-     * This triggers a re-query of the database
-     */
     public void refreshSessions() {
         Log.d(TAG, "Refreshing sessions");
-        // The LiveData will automatically update when the database changes
-        // This method can be used to trigger manual refresh if needed
     }
     
-    // =========================================================================
-    // Provider Configuration
-    // =========================================================================
-    
-    /**
-     * Check if the default provider is configured
-     * 
-     * @return true if the default provider has an API key configured
-     */
     public boolean isDefaultProviderConfigured() {
         String provider = settingsRepository.getDefaultProvider();
         return settingsRepository.isProviderConfigured(provider);
     }
     
-    /**
-     * Get the default provider ID
-     * 
-     * @return The default provider ID
-     */
     public String getDefaultProvider() {
         return settingsRepository.getDefaultProvider();
     }
     
-    /**
-     * Get the default model ID
-     * 
-     * @return The default model ID
-     */
     public String getDefaultModel() {
         return settingsRepository.getDefaultModel();
     }
-    
-    // =========================================================================
-    // Cleanup
-    // =========================================================================
     
     @Override
     protected void onCleared() {

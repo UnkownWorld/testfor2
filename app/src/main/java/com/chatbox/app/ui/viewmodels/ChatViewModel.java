@@ -251,6 +251,15 @@ public class ChatViewModel extends AndroidViewModel {
     }
     
     /**
+     * Update a message
+     * 
+     * @param message The message to update
+     */
+    public void updateMessage(Message message) {
+        chatRepository.updateMessage(message);
+    }
+    
+    /**
      * Clear all messages in the session
      */
     public void clearMessages() {

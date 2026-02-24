@@ -117,44 +117,4 @@ public class Converters {
             return new ArrayList<>();
         }
     }
-    
-    // =========================================================================
-    // Generic Object Converters
-    // =========================================================================
-    
-    /**
-     * Convert any object to a JSON string
-     * 
-     * @param object The object to convert
-     * @param <T> The type of the object
-     * @return JSON string representation of the object, or null if object is null
-     */
-    @TypeConverter
-    public static <T> String fromObject(T object) {
-        if (object == null) {
-            return null;
-        }
-        return gson.toJson(object);
-    }
-    
-    /**
-     * Convert a JSON string to an object of the specified type
-     * 
-     * @param value The JSON string to convert
-     * @param type The type of the object
-     * @param <T> The type of the object
-     * @return Object of type T, or null if value is null or parsing fails
-     */
-    @TypeConverter
-    public static <T> T toObject(String value, Type type) {
-        if (value == null || value.isEmpty()) {
-            return null;
-        }
-        try {
-            return gson.fromJson(value, type);
-        } catch (Exception e) {
-            // Return null if parsing fails
-            return null;
-        }
-    }
 }

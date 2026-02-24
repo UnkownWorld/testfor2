@@ -400,6 +400,16 @@ public class ChatRepository {
     }
     
     /**
+     * Update a message
+     * 
+     * @param message The message to update
+     */
+    public void updateMessage(Message message) {
+        message.setUpdatedAt(System.currentTimeMillis());
+        executor.execute(() -> messageDao.update(message));
+    }
+    
+    /**
      * Clear all messages in a session
      * 
      * @param sessionId Session ID

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Launcher Icon Foreground
+    
+    A simple chat bubble icon for the app launcher.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Chat bubble shape -->
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M54,20C37.4,20 24,31.2 24,45C24,52.4 27.8,59 34,63.4L34,80L50,70.8C51.3,70.9 52.6,71 54,71C70.6,71 84,59.8 84,46C84,32.2 70.6,20 54,20Z"/>
+    
+    <!-- Inner highlight -->
+    <path
+        android:fillColor="#64B5F6"
+        android:pathData="M54,26C40.8,26 30,34.5 30,45C30,50.8 33.2,55.9 38.2,59.4L38.2,72L48,66.2C49.9,66.5 51.9,66.7 54,66.7C67.2,66.7 78,57.5 78,46.3C78,35.2 67.2,26 54,26Z"/>
+
+</vector>

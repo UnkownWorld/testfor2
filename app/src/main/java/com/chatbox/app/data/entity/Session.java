@@ -154,11 +154,24 @@ public class Session {
     private Integer contextLength;
     
     /**
+     * Maximum context messages
+     * Limits how many previous messages to include
+     */
+    @ColumnInfo(name = "max_context_messages")
+    private Integer maxContextMessages;
+    
+    /**
      * Maximum tokens to generate
      * Limits the length of AI responses
      */
     @ColumnInfo(name = "max_tokens")
     private Integer maxTokens;
+    
+    /**
+     * Whether streaming is enabled for this session
+     */
+    @ColumnInfo(name = "streaming_enabled")
+    private boolean streamingEnabled;
     
     /**
      * Timestamp when the session was created
@@ -354,12 +367,28 @@ public class Session {
         this.contextLength = contextLength;
     }
     
+    public Integer getMaxContextMessages() {
+        return maxContextMessages;
+    }
+    
+    public void setMaxContextMessages(Integer maxContextMessages) {
+        this.maxContextMessages = maxContextMessages;
+    }
+    
     public Integer getMaxTokens() {
         return maxTokens;
     }
     
     public void setMaxTokens(Integer maxTokens) {
         this.maxTokens = maxTokens;
+    }
+    
+    public boolean isStreamingEnabled() {
+        return streamingEnabled;
+    }
+    
+    public void setStreamingEnabled(boolean streamingEnabled) {
+        this.streamingEnabled = streamingEnabled;
     }
     
     public long getCreatedAt() {

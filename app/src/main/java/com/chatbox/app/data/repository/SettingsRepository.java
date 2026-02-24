@@ -157,6 +157,98 @@ public class SettingsRepository {
     }
     
     /**
+     * Get all providers
+     * 
+     * @return List of all providers
+     */
+    public List<ProviderSettings> getAllProviders() {
+        return providerSettingsDao.getAllSettings();
+    }
+    
+    /**
+     * Get available models for a provider
+     * 
+     * @param providerId Provider ID
+     * @return List of model IDs
+     */
+    public List<String> getModelsForProvider(String providerId) {
+        List<String> models = new java.util.ArrayList<>();
+        
+        // Default models for each provider
+        switch (providerId) {
+            case ProviderSettings.PROVIDER_OPENAI:
+                models.add("gpt-4o");
+                models.add("gpt-4o-mini");
+                models.add("gpt-4-turbo");
+                models.add("gpt-4");
+                models.add("gpt-3.5-turbo");
+                models.add("gpt-3.5-turbo-16k");
+                break;
+            case ProviderSettings.PROVIDER_CLAUDE:
+                models.add("claude-3-5-sonnet-20241022");
+                models.add("claude-3-5-haiku-20241022");
+                models.add("claude-3-opus-20240229");
+                models.add("claude-3-sonnet-20240229");
+                models.add("claude-3-haiku-20240307");
+                break;
+            case ProviderSettings.PROVIDER_GEMINI:
+                models.add("gemini-1.5-pro");
+                models.add("gemini-1.5-flash");
+                models.add("gemini-1.0-pro");
+                break;
+            case ProviderSettings.PROVIDER_DEEPSEEK:
+                models.add("deepseek-chat");
+                models.add("deepseek-coder");
+                break;
+            case ProviderSettings.PROVIDER_GROQ:
+                models.add("llama-3.3-70b-versatile");
+                models.add("llama-3.1-70b-versatile");
+                models.add("llama-3.1-8b-instant");
+                models.add("mixtral-8x7b-32768");
+                models.add("gemma2-9b-it");
+                break;
+            case ProviderSettings.PROVIDER_MISTRAL:
+                models.add("mistral-large-latest");
+                models.add("mistral-medium-latest");
+                models.add("mistral-small-latest");
+                models.add("open-mistral-nemo");
+                models.add("codestral-latest");
+                break;
+            case ProviderSettings.PROVIDER_OLLAMA:
+                models.add("llama3.2");
+                models.add("llama3.1");
+                models.add("llama3");
+                models.add("mistral");
+                models.add("codellama");
+                models.add("qwen2.5");
+                break;
+            case ProviderSettings.PROVIDER_XAI:
+                models.add("grok-beta");
+                break;
+            case ProviderSettings.PROVIDER_PERPLEXITY:
+                models.add("llama-3.1-sonar-small-128k-online");
+                models.add("llama-3.1-sonar-large-128k-online");
+                models.add("llama-3.1-sonar-huge-128k-online");
+                break;
+            case ProviderSettings.PROVIDER_OPENROUTER:
+                models.add("openai/gpt-4o");
+                models.add("openai/gpt-4o-mini");
+                models.add("anthropic/claude-3.5-sonnet");
+                models.add("google/gemini-pro-1.5");
+                models.add("meta-llama/llama-3.1-70b-instruct");
+                break;
+            default:
+                // For custom providers, add some common models
+                models.add("gpt-4o-mini");
+                models.add("gpt-3.5-turbo");
+                models.add("claude-3-5-sonnet-20241022");
+                break;
+        }
+        
+        return models;
+    }
+    
+    /**
      * Get all configured providers (LiveData)
      * 
      * @return LiveData containing list of configured providers

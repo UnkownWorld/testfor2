@@ -14,6 +14,7 @@ import androidx.preference.SwitchPreferenceCompat;
 
 import com.chatbox.app.R;
 import com.chatbox.app.data.preferences.SettingsPreferences;
+import com.chatbox.app.databinding.ActivitySettingsBinding;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 /**
@@ -33,21 +34,22 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
  */
 public class SettingsActivity extends AppCompatActivity {
     
-    /**
-     * Log tag for debugging
-     */
     private static final String TAG = "SettingsActivity";
+    private ActivitySettingsBinding binding;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
         
-        setContentView(R.layout.activity_settings);
+        binding = ActivitySettingsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         
-        // Set up toolbar
+        // Set up toolbar with back button
+        setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
             getSupportActionBar().setTitle(R.string.settings);
         }
         
@@ -63,10 +65,16 @@ public class SettingsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            // 返回上一级
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
     
     /**
@@ -87,9 +95,6 @@ public class SettingsActivity extends AppCompatActivity {
             setupPreferenceListeners();
         }
         
-        /**
-         * Set up preference click listeners
-         */
         private void setupPreferenceListeners() {
             // API Configuration
             Preference apiConfigPref = findPreference("api_configuration");
@@ -121,12 +126,10 @@ public class SettingsActivity extends AppCompatActivity {
             String key = preference.getKey();
             
             if ("api_configuration".equals(key)) {
-                // Open API configuration activity
                 Intent intent = new Intent(requireContext(), ApiConfigActivity.class);
                 startActivity(intent);
                 return true;
             } else if ("clear_data".equals(key)) {
-                // Show clear data confirmation dialog
                 showClearDataDialog();
                 return true;
             }
@@ -139,14 +142,11 @@ public class SettingsActivity extends AppCompatActivity {
             String key = preference.getKey();
             
             if ("theme".equals(key)) {
-                // Theme changed
                 String theme = (String) newValue;
                 preferences.setTheme(theme);
-                // Recreate activity to apply theme
                 requireActivity().recreate();
                 return true;
             } else if ("dynamic_colors".equals(key)) {
-                // Dynamic colors changed
                 boolean enabled = (Boolean) newValue;
                 preferences.setDynamicColorsEnabled(enabled);
                 requireActivity().recreate();
@@ -156,31 +156,20 @@ public class SettingsActivity extends AppCompatActivity {
             return true;
         }
         
-        /**
-         * Show clear data confirmation dialog
-         */
         private void showClearDataDialog() {
             new MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.clear_data)
                 .setMessage(R.string.clear_data_confirm)
                 .setPositiveButton(R.string.clear, (dialog, which) -> {
-                    // Clear all data
                     clearAllData();
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
         }
         
-        /**
-         * Clear all app data
-         */
         private void clearAllData() {
-            // Clear database
             com.chatbox.app.data.database.ChatboxDatabase.getInstance(requireContext()).clearAllData();
-            
-            // Clear preferences
             preferences.clearAll();
-            
             Toast.makeText(requireContext(), R.string.data_cleared, Toast.LENGTH_SHORT).show();
         }
     }

@@ -19,9 +19,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.chatbox.app.R;
 import com.chatbox.app.data.entity.Message;
 import com.chatbox.app.databinding.ActivityChatBinding;
+import com.chatbox.app.databinding.DialogEditMessageBinding;
 import com.chatbox.app.ui.adapters.MessageAdapter;
 import com.chatbox.app.ui.viewmodels.ChatViewModel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,7 @@ import java.util.List;
  * - View message history
  * - Send new messages
  * - Receive AI responses
- * - Copy and delete messages
+ * - Copy, edit and delete messages
  * 
  * @author Chatbox Team
  * @version 1.0.0
@@ -41,39 +43,13 @@ import java.util.List;
  */
 public class ChatActivity extends AppCompatActivity implements MessageAdapter.OnMessageClickListener {
     
-    /**
-     * Log tag for debugging
-     */
     private static final String TAG = "ChatActivity";
-    
-    /**
-     * Extra key for session ID
-     */
     public static final String EXTRA_SESSION_ID = "session_id";
     
-    /**
-     * View binding
-     */
     private ActivityChatBinding binding;
-    
-    /**
-     * ViewModel
-     */
     private ChatViewModel viewModel;
-    
-    /**
-     * Message adapter
-     */
     private MessageAdapter messageAdapter;
-    
-    /**
-     * Session ID
-     */
     private String sessionId;
-    
-    // =========================================================================
-    // Activity Lifecycle
-    // =========================================================================
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +59,6 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        // Get session ID from intent
         sessionId = getIntent().getStringExtra(EXTRA_SESSION_ID);
         if (sessionId == null || sessionId.isEmpty()) {
             Log.e(TAG, "No session ID provided");
@@ -92,24 +67,17 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             return;
         }
         
-        // Set up toolbar
         setSupportActionBar(binding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("");
         }
         
-        // Initialize ViewModel
         viewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         viewModel.setSessionId(sessionId);
         
-        // Initialize RecyclerView
         setupRecyclerView();
-        
-        // Set up input
         setupInput();
-        
-        // Observe data
         observeData();
     }
     
@@ -120,13 +88,6 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         binding = null;
     }
     
-    // =========================================================================
-    // UI Setup
-    // =========================================================================
-    
-    /**
-     * Set up the RecyclerView for messages
-     */
     private void setupRecyclerView() {
         messageAdapter = new MessageAdapter(this, new ArrayList<>());
         messageAdapter.setOnMessageClickListener(this);
@@ -137,7 +98,6 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         binding.recyclerViewMessages.setLayoutManager(layoutManager);
         binding.recyclerViewMessages.setAdapter(messageAdapter);
         
-        // Scroll to bottom when new messages arrive
         messageAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
@@ -148,14 +108,9 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         });
     }
     
-    /**
-     * Set up the input area
-     */
     private void setupInput() {
-        // Send button click
         binding.buttonSend.setOnClickListener(v -> sendMessage());
         
-        // Enter key handling
         binding.editMessage.setOnEditorActionListener((v, actionId, event) -> {
             if (viewModel.isSendOnEnter()) {
                 sendMessage();
@@ -165,20 +120,13 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         });
     }
     
-    /**
-     * Observe LiveData from ViewModel
-     */
     private void observeData() {
-        // Observe session
         viewModel.getSession().observe(this, session -> {
-            if (session != null) {
-                if (getSupportActionBar() != null) {
-                    getSupportActionBar().setTitle(session.getDisplayTitle());
-                }
+            if (session != null && getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(session.getDisplayTitle());
             }
         });
         
-        // Observe messages
         viewModel.getMessages().observe(this, messages -> {
             if (messages != null) {
                 messageAdapter.updateMessages(messages);
@@ -188,13 +136,11 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             }
         });
         
-        // Observe loading state
         viewModel.getIsLoading().observe(this, isLoading -> {
             binding.buttonSend.setEnabled(!isLoading);
             binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         });
         
-        // Observe errors
         viewModel.getError().observe(this, error -> {
             if (error != null && !error.isEmpty()) {
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show();
@@ -202,33 +148,20 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         });
     }
     
-    // =========================================================================
-    // Actions
-    // =========================================================================
-    
-    /**
-     * Send a message
-     */
     private void sendMessage() {
         String content = binding.editMessage.getText().toString().trim();
         if (content.isEmpty()) {
             return;
         }
         
-        // Clear input
         binding.editMessage.setText("");
         
-        // Send message
         viewModel.sendMessage(content, new ChatViewModel.SendCallback() {
             @Override
-            public void onChunk(String chunk) {
-                // Update UI with chunk (handled by LiveData)
-            }
+            public void onChunk(String chunk) {}
             
             @Override
-            public void onComplete() {
-                // Message complete
-            }
+            public void onComplete() {}
             
             @Override
             public void onError(String error) {
@@ -237,9 +170,6 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         });
     }
     
-    /**
-     * Clear all messages in the session
-     */
     private void clearChat() {
         new MaterialAlertDialogBuilder(this)
             .setTitle(R.string.clear_chat)
@@ -252,11 +182,6 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             .show();
     }
     
-    /**
-     * Copy message to clipboard
-     * 
-     * @param message The message to copy
-     */
     private void copyMessage(Message message) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("Message", message.getContent());
@@ -264,11 +189,27 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         Toast.makeText(this, R.string.message_copied, Toast.LENGTH_SHORT).show();
     }
     
-    /**
-     * Delete a message
-     * 
-     * @param message The message to delete
-     */
+    private void editMessage(Message message) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_message, null);
+        TextInputEditText inputContent = dialogView.findViewById(R.id.input_message_content);
+        inputContent.setText(message.getContent());
+        
+        new MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.edit_message)
+            .setView(dialogView)
+            .setPositiveButton(R.string.save, (dialog, which) -> {
+                String newContent = inputContent.getText() != null ? 
+                    inputContent.getText().toString().trim() : "";
+                if (!newContent.isEmpty()) {
+                    message.setContent(newContent);
+                    viewModel.updateMessage(message);
+                    Toast.makeText(this, R.string.message_updated, Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .show();
+    }
+    
     private void deleteMessage(Message message) {
         new MaterialAlertDialogBuilder(this)
             .setTitle(R.string.delete_message)
@@ -281,10 +222,6 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             .show();
     }
     
-    // =========================================================================
-    // MessageAdapter.OnMessageClickListener
-    // =========================================================================
-    
     @Override
     public void onMessageClick(Message message) {
         // Handle message click (could expand/collapse)
@@ -292,16 +229,9 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
     
     @Override
     public void onMessageLongClick(Message message, View anchor) {
-        // Show context menu
         showMessageContextMenu(message, anchor);
     }
     
-    /**
-     * Show context menu for a message
-     * 
-     * @param message The message
-     * @param anchor The anchor view
-     */
     private void showMessageContextMenu(Message message, View anchor) {
         androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(this, anchor);
         popup.getMenuInflater().inflate(R.menu.menu_message_context, popup.getMenu());
@@ -309,7 +239,10 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         popup.setOnMenuItemClickListener(item -> {
             int itemId = item.getItemId();
             
-            if (itemId == R.id.action_copy) {
+            if (itemId == R.id.action_edit) {
+                editMessage(message);
+                return true;
+            } else if (itemId == R.id.action_copy) {
                 copyMessage(message);
                 return true;
             } else if (itemId == R.id.action_delete) {
@@ -322,10 +255,6 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         
         popup.show();
     }
-    
-    // =========================================================================
-    // Menu
-    // =========================================================================
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -191,4 +191,45 @@
     <string name="error_session_not_found">Session not found</string>
     <string name="error_provider_not_configured">Provider not configured</string>
     
+    <!-- Provider Status -->
+    <string name="status">Status</string>
+    <string name="configured">Configured</string>
+    <string name="not_configured">Not Configured</string>
+
+    <!-- Additional strings -->
+    <string name="clear">Clear</string>
+    <string name="testing_connection">Testing connection…</string>
+
+    <!-- Additional strings -->
+    <string name="add_custom_provider">Add Custom Provider</string>
+    <string name="edit_message">Edit Message</string>
+    <string name="language_chinese">简体中文</string>
+    <string name="language_english">English</string>
+    <string name="message_updated">Message updated</string>
+    <string name="provider_name">Provider Name</string>
+    <string name="provider_name_hint">e.g., My API</string>
+
+    <!-- New Chat Dialog -->
+    <string name="select_model">Select Model</string>
+    <string name="chat_name_optional">Chat Name (Optional)</string>
+    <string name="system_prompt">System Prompt</string>
+    <string name="system_prompt_hint">Set the AI behavior and personality</string>
+    <string name="temperature">Temperature</string>
+    <string name="temperature_hint">Controls randomness: 0 = focused, 2 = creative</string>
+    <string name="top_p">Top P</string>
+    <string name="top_p_hint">Nucleus sampling: 0.1 = focused, 1 = diverse</string>
+    <string name="max_context_messages">Max Context Messages</string>
+    <string name="max_context_hint">Number of previous messages to include</string>
+    <string name="max_tokens">Max Output Tokens</string>
+    <string name="max_tokens_hint">Maximum length of AI response</string>
+    <string name="streaming_response">Streaming Response</string>
+    <string name="streaming_response_hint">Show response as it generates</string>
+    <string name="create_chat">Create Chat</string>
+    <string name="no_provider_configured">No provider configured</string>
+    <string name="please_configure_provider">Please configure at least one API provider in Settings.</string>
+    <string name="use_last_settings">Use last settings</string>
+    <string name="default_model_for_provider">Default model for %1$s</string>
+
+    <string name="advanced_settings">Advanced Settings</string>
+
 </resources>

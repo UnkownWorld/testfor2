@@ -6,20 +6,23 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.chatbox.app.R;
+import com.chatbox.app.data.entity.ProviderSettings;
 import com.chatbox.app.data.entity.Session;
 import com.chatbox.app.databinding.ActivityMainBinding;
+import com.chatbox.app.databinding.DialogNewChatBinding;
 import com.chatbox.app.ui.adapters.SessionAdapter;
 import com.chatbox.app.ui.viewmodels.MainViewModel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.slider.Slider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,66 +33,32 @@ import java.util.List;
  * This activity displays the list of chat sessions and provides
  * navigation to create new chats, open existing chats, and access settings.
  * 
- * Features:
- * - Display list of chat sessions
- * - Create new chat sessions
- * - Open existing chat sessions
- * - Delete chat sessions
- * - Star/unstar sessions
- * - Navigate to settings
- * 
  * @author Chatbox Team
  * @version 1.0.0
  * @since 2024
  */
 public class MainActivity extends AppCompatActivity implements SessionAdapter.OnSessionClickListener {
     
-    /**
-     * Log tag for debugging
-     */
     private static final String TAG = "MainActivity";
     
-    /**
-     * View binding for the activity
-     */
     private ActivityMainBinding binding;
-    
-    /**
-     * ViewModel for this activity
-     */
     private MainViewModel viewModel;
-    
-    /**
-     * Adapter for the session list
-     */
     private SessionAdapter sessionAdapter;
-    
-    // =========================================================================
-    // Activity Lifecycle
-    // =========================================================================
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
         
-        // Initialize view binding
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        // Set up toolbar
         setSupportActionBar(binding.toolbar);
         
-        // Initialize ViewModel
         viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         
-        // Initialize RecyclerView
         setupRecyclerView();
-        
-        // Set up FAB (Floating Action Button)
         setupFab();
-        
-        // Observe data
         observeData();
     }
     
@@ -97,7 +66,6 @@ public class MainActivity extends AppCompatActivity implements SessionAdapter.On
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        // Refresh the session list
         viewModel.refreshSessions();
     }
     
@@ -108,13 +76,6 @@ public class MainActivity extends AppCompatActivity implements SessionAdapter.On
         binding = null;
     }
     
-    // =========================================================================
-    // UI Setup
-    // =========================================================================
-    
-    /**
-     * Set up the RecyclerView for session list
-     */
     private void setupRecyclerView() {
         sessionAdapter = new SessionAdapter(this, new ArrayList<>());
         sessionAdapter.setOnSessionClickListener(this);
@@ -122,98 +83,237 @@ public class MainActivity extends AppCompatActivity implements SessionAdapter.On
         binding.recyclerViewSessions.setLayoutManager(new LinearLayoutManager(this));
         binding.recyclerViewSessions.setAdapter(sessionAdapter);
         
-        // Add item decoration for spacing
         binding.recyclerViewSessions.addItemDecoration(
             new SessionAdapter.SessionItemDecoration(getResources().getDimensionPixelSize(R.dimen.session_item_margin))
         );
     }
     
-    /**
-     * Set up the Floating Action Button
-     */
     private void setupFab() {
-        binding.fabNewChat.setOnClickListener(v -> createNewSession());
+        binding.fabNewChat.setOnClickListener(v -> showNewChatDialog());
     }
     
-    /**
-     * Observe LiveData from ViewModel
-     */
     private void observeData() {
-        // Observe sessions
         viewModel.getSessions().observe(this, sessions -> {
             Log.d(TAG, "Sessions updated: " + (sessions != null ? sessions.size() : 0) + " sessions");
             
             if (sessions == null || sessions.isEmpty()) {
-                // Show empty state
                 showEmptyState(true);
             } else {
-                // Show session list
                 showEmptyState(false);
                 sessionAdapter.updateSessions(sessions);
             }
         });
         
-        // Observe errors
         viewModel.getError().observe(this, error -> {
             if (error != null && !error.isEmpty()) {
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show();
             }
         });
         
-        // Observe loading state
         viewModel.getIsLoading().observe(this, isLoading -> {
             binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         });
     }
     
-    /**
-     * Show or hide the empty state view
-     * 
-     * @param show true to show empty state, false to hide
-     */
     private void showEmptyState(boolean show) {
         binding.emptyStateLayout.setVisibility(show ? View.VISIBLE : View.GONE);
         binding.recyclerViewSessions.setVisibility(show ? View.GONE : View.VISIBLE);
     }
     
-    // =========================================================================
-    // Actions
-    // =========================================================================
-    
     /**
-     * Create a new chat session
+     * Show new chat dialog with provider/model selection
      */
-    private void createNewSession() {
-        Log.d(TAG, "Creating new session");
+    private void showNewChatDialog() {
+        Log.d(TAG, "Showing new chat dialog");
         
-        // Check if default provider is configured
-        if (!viewModel.isDefaultProviderConfigured()) {
-            // Show dialog to configure API first
+        // Get configured providers
+        List<ProviderSettings> configuredProviders = viewModel.getConfiguredProviders();
+        
+        if (configuredProviders.isEmpty()) {
             new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.configure_api_first)
-                .setMessage(R.string.configure_api_message)
-                .setPositiveButton(R.string.configure, (dialog, which) -> {
-                    openSettings();
-                })
+                .setTitle(R.string.no_provider_configured)
+                .setMessage(R.string.please_configure_provider)
+                .setPositiveButton(R.string.configure, (dialog, which) -> openSettings())
                 .setNegativeButton(R.string.cancel, null)
                 .show();
             return;
         }
         
-        // Create new session
-        Session session = viewModel.createSession();
-        if (session != null) {
-            openChat(session.getId());
-        } else {
-            Toast.makeText(this, R.string.error_creating_session, Toast.LENGTH_SHORT).show();
+        // Create dialog
+        DialogNewChatBinding dialogBinding = DialogNewChatBinding.inflate(getLayoutInflater());
+        
+        // Setup provider spinner
+        List<String> providerNames = new ArrayList<>();
+        List<String> providerIds = new ArrayList<>();
+        for (ProviderSettings provider : configuredProviders) {
+            providerNames.add(provider.getDisplayName());
+            providerIds.add(provider.getProvider());
         }
+        
+        android.widget.ArrayAdapter<String> providerAdapter = new android.widget.ArrayAdapter<>(
+            this, android.R.layout.simple_dropdown_item_1line, providerNames);
+        dialogBinding.spinnerProvider.setAdapter(providerAdapter);
+        
+        // Setup model spinner (will be updated based on provider selection)
+        List<String> modelIds = new ArrayList<>();
+        android.widget.ArrayAdapter<String> modelAdapter = new android.widget.ArrayAdapter<>(
+            this, android.R.layout.simple_dropdown_item_1line);
+        dialogBinding.spinnerModel.setAdapter(modelAdapter);
+        
+        // Get last used settings
+        ProviderSettings lastProvider = viewModel.getLastUsedProvider();
+        String lastModel = viewModel.getLastUsedModel();
+        
+        // Set default provider
+        int defaultProviderIndex = 0;
+        if (lastProvider != null) {
+            int idx = providerIds.indexOf(lastProvider.getProvider());
+            if (idx >= 0) defaultProviderIndex = idx;
+        }
+        dialogBinding.spinnerProvider.setText(providerNames.get(defaultProviderIndex), false);
+        
+        // Update models for selected provider
+        updateModelSpinner(configuredProviders.get(defaultProviderIndex), modelAdapter, modelIds);
+        
+        // Set default model
+        if (lastModel != null && modelIds.contains(lastModel)) {
+            dialogBinding.spinnerModel.setText(lastModel, false);
+        } else if (!modelIds.isEmpty()) {
+            dialogBinding.spinnerModel.setText(modelAdapter.getItem(0), false);
+        }
+        
+        // Provider selection listener
+        dialogBinding.spinnerProvider.setOnItemClickListener((parent, view, position, id) -> {
+            ProviderSettings selectedProvider = configuredProviders.get(position);
+            updateModelSpinner(selectedProvider, modelAdapter, modelIds);
+            if (!modelIds.isEmpty()) {
+                dialogBinding.spinnerModel.setText(modelAdapter.getItem(0), false);
+            }
+        });
+        
+        // Advanced settings toggle
+        dialogBinding.btnAdvancedSettings.setOnClickListener(v -> {
+            if (dialogBinding.layoutAdvanced.getVisibility() == View.GONE) {
+                dialogBinding.layoutAdvanced.setVisibility(View.VISIBLE);
+                dialogBinding.btnAdvancedSettings.setIcon(getDrawable(R.drawable.ic_expand_less));
+            } else {
+                dialogBinding.layoutAdvanced.setVisibility(View.GONE);
+                dialogBinding.btnAdvancedSettings.setIcon(getDrawable(R.drawable.ic_expand_more));
+            }
+        });
+        
+        // Temperature slider
+        dialogBinding.sliderTemperature.addOnChangeListener((slider, value, fromUser) -> {
+            dialogBinding.textTemperatureValue.setText(String.format("%.1f", value));
+        });
+        
+        // Top P slider
+        dialogBinding.sliderTopP.addOnChangeListener((slider, value, fromUser) -> {
+            dialogBinding.textTopPValue.setText(String.format("%.2f", value));
+        });
+        
+        // Set default values from last session
+        if (lastProvider != null) {
+            dialogBinding.sliderTemperature.setValue(viewModel.getLastTemperature());
+            dialogBinding.sliderTopP.setValue(viewModel.getLastTopP());
+            dialogBinding.inputMaxContext.setText(String.valueOf(viewModel.getLastMaxContext()));
+            dialogBinding.inputMaxTokens.setText(String.valueOf(viewModel.getLastMaxTokens()));
+            dialogBinding.switchStreaming.setChecked(viewModel.isLastStreaming());
+            String lastSystemPrompt = viewModel.getLastSystemPrompt();
+            if (lastSystemPrompt != null && !lastSystemPrompt.isEmpty()) {
+                dialogBinding.inputSystemPrompt.setText(lastSystemPrompt);
+            }
+        }
+        
+        // Show dialog
+        new MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.new_chat)
+            .setView(dialogBinding.getRoot())
+            .setPositiveButton(R.string.create_chat, (dialog, which) -> {
+                // Get selected provider
+                int providerPosition = providerNames.indexOf(dialogBinding.spinnerProvider.getText().toString());
+                if (providerPosition < 0) providerPosition = 0;
+                ProviderSettings selectedProvider = configuredProviders.get(providerPosition);
+                
+                // Get selected model
+                String selectedModel = dialogBinding.spinnerModel.getText().toString();
+                if (selectedModel.isEmpty() && !modelIds.isEmpty()) {
+                    selectedModel = modelIds.get(0);
+                }
+                
+                // Get other settings
+                String chatName = dialogBinding.inputChatName.getText() != null ? 
+                    dialogBinding.inputChatName.getText().toString().trim() : "";
+                String systemPrompt = dialogBinding.inputSystemPrompt.getText() != null ?
+                    dialogBinding.inputSystemPrompt.getText().toString().trim() : "";
+                float temperature = dialogBinding.sliderTemperature.getValue();
+                float topP = dialogBinding.sliderTopP.getValue();
+                int maxContext = 20;
+                int maxTokens = 4096;
+                
+                try {
+                    String maxContextStr = dialogBinding.inputMaxContext.getText().toString();
+                    if (!maxContextStr.isEmpty()) {
+                        maxContext = Integer.parseInt(maxContextStr);
+                    }
+                } catch (NumberFormatException e) {
+                    maxContext = 20;
+                }
+                
+                try {
+                    String maxTokensStr = dialogBinding.inputMaxTokens.getText().toString();
+                    if (!maxTokensStr.isEmpty()) {
+                        maxTokens = Integer.parseInt(maxTokensStr);
+                    }
+                } catch (NumberFormatException e) {
+                    maxTokens = 4096;
+                }
+                
+                boolean streaming = dialogBinding.switchStreaming.isChecked();
+                
+                // Save settings for next time
+                viewModel.saveLastSettings(selectedProvider.getProvider(), selectedModel, 
+                    temperature, topP, maxContext, maxTokens, streaming, systemPrompt);
+                
+                // Create session
+                Session session = viewModel.createSession(
+                    chatName.isEmpty() ? null : chatName,
+                    selectedProvider.getProvider(),
+                    selectedModel,
+                    systemPrompt,
+                    temperature,
+                    topP,
+                    maxContext,
+                    maxTokens,
+                    streaming
+                );
+                
+                if (session != null) {
+                    openChat(session.getId());
+                } else {
+                    Toast.makeText(this, R.string.error_creating_session, Toast.LENGTH_SHORT).show();
+                }
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .show();
     }
     
     /**
-     * Open a chat session
-     * 
-     * @param sessionId The session ID
+     * Update model spinner based on selected provider
      */
+    private void updateModelSpinner(ProviderSettings provider, android.widget.ArrayAdapter<String> modelAdapter, List<String> modelIds) {
+        modelAdapter.clear();
+        modelIds.clear();
+        
+        // Get models for this provider
+        List<String> models = viewModel.getModelsForProvider(provider.getProvider());
+        for (String model : models) {
+            modelAdapter.add(model);
+            modelIds.add(model);
+        }
+        modelAdapter.notifyDataSetChanged();
+    }
+    
     private void openChat(String sessionId) {
         Log.d(TAG, "Opening chat: " + sessionId);
         Intent intent = new Intent(this, ChatActivity.class);
@@ -221,20 +321,12 @@ public class MainActivity extends AppCompatActivity implements SessionAdapter.On
         startActivity(intent);
     }
     
-    /**
-     * Open settings
-     */
     private void openSettings() {
         Log.d(TAG, "Opening settings");
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
     
-    /**
-     * Show delete confirmation dialog
-     * 
-     * @param session The session to delete
-     */
     private void showDeleteDialog(Session session) {
         new MaterialAlertDialogBuilder(this)
             .setTitle(R.string.delete_session)
@@ -247,10 +339,6 @@ public class MainActivity extends AppCompatActivity implements SessionAdapter.On
             .show();
     }
     
-    // =========================================================================
-    // SessionAdapter.OnSessionClickListener
-    // =========================================================================
-    
     @Override
     public void onSessionClick(Session session) {
         openChat(session.getId());
@@ -258,7 +346,6 @@ public class MainActivity extends AppCompatActivity implements SessionAdapter.On
     
     @Override
     public void onSessionLongClick(Session session, View anchor) {
-        // Show context menu
         showSessionContextMenu(session, anchor);
     }
     
@@ -267,17 +354,10 @@ public class MainActivity extends AppCompatActivity implements SessionAdapter.On
         viewModel.toggleStarred(session);
     }
     
-    /**
-     * Show context menu for a session
-     * 
-     * @param session The session
-     * @param anchor The anchor view for the popup
-     */
     private void showSessionContextMenu(Session session, View anchor) {
         androidx.appcompat.widget.PopupMenu popup = new androidx.appcompat.widget.PopupMenu(this, anchor);
         popup.getMenuInflater().inflate(R.menu.menu_session_context, popup.getMenu());
         
-        // Update star menu item
         MenuItem starItem = popup.getMenu().findItem(R.id.action_star);
         starItem.setTitle(session.isStarred() ? R.string.unstar : R.string.star);
         starItem.setIcon(session.isStarred() ? R.drawable.ic_star_filled : R.drawable.ic_star_outline);
@@ -302,13 +382,7 @@ public class MainActivity extends AppCompatActivity implements SessionAdapter.On
         popup.show();
     }
     
-    /**
-     * Show rename dialog
-     * 
-     * @param session The session to rename
-     */
     private void showRenameDialog(Session session) {
-        // Create EditText for input
         com.google.android.material.textfield.TextInputEditText input = 
             new com.google.android.material.textfield.TextInputEditText(this);
         input.setText(session.getName());
@@ -335,10 +409,6 @@ public class MainActivity extends AppCompatActivity implements SessionAdapter.On
             .show();
     }
     
-    // =========================================================================
-    // Menu
-    // =========================================================================
-    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -353,7 +423,6 @@ public class MainActivity extends AppCompatActivity implements SessionAdapter.On
             openSettings();
             return true;
         } else if (itemId == R.id.action_search) {
-            // TODO: Implement search
             Toast.makeText(this, R.string.search_coming_soon, Toast.LENGTH_SHORT).show();
             return true;
         }

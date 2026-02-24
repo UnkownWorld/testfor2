@@ -147,23 +147,23 @@
     <!-- =====================================================================
          Component Styles
          ===================================================================== -->
-    <style name="Widget.Chatbox.CardView" parent="Widget.Material3.CardView.Elevated">
+    <style name="Widget.Chatbox.CardView" parent="Widget.MaterialComponents.CardView">
         <item name="cardCornerRadius">@dimen/card_corner_radius</item>
         <item name="cardElevation">@dimen/card_elevation</item>
         <item name="contentPadding">@dimen/card_margin</item>
     </style>
 
-    <style name="Widget.Chatbox.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+    <style name="Widget.Chatbox.FloatingActionButton" parent="Widget.MaterialComponents.FloatingActionButton">
         <item name="elevation">6dp</item>
         <item name="pressedTranslationZ">12dp</item>
     </style>
 
-    <style name="Widget.Chatbox.Toolbar" parent="Widget.Material3.Toolbar.Primary">
+    <style name="Widget.Chatbox.Toolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
         <item name="titleTextAppearance">@style/TextAppearance.Chatbox.TitleLarge</item>
         <item name="subtitleTextAppearance">@style/TextAppearance.Chatbox.TitleMedium</item>
     </style>
 
-    <style name="Widget.Chatbox.AppBar" parent="Widget.Material3.AppBarLayout">
+    <style name="Widget.Chatbox.AppBar" parent="Widget.MaterialComponents.AppBarLayout.Primary">
         <item name="elevation">4dp</item>
     </style>
 

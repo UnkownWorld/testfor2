@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.chatbox.app.R;
 import com.chatbox.app.data.entity.ProviderSettings;
@@ -19,10 +18,9 @@ import com.chatbox.app.ui.adapters.ProviderAdapter;
 import com.chatbox.app.ui.viewmodels.ApiConfigViewModel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
 /**
  * ApiConfigActivity - Activity for configuring API settings
@@ -30,6 +28,7 @@ import java.util.List;
  * This activity allows users to:
  * - View configured providers
  * - Add/edit provider settings
+ * - Add custom providers
  * - Test API connections
  * 
  * @author Chatbox Team
@@ -38,24 +37,10 @@ import java.util.List;
  */
 public class ApiConfigActivity extends AppCompatActivity implements ProviderAdapter.OnProviderClickListener {
     
-    /**
-     * Log tag for debugging
-     */
     private static final String TAG = "ApiConfigActivity";
     
-    /**
-     * View binding
-     */
     private ActivityApiConfigBinding binding;
-    
-    /**
-     * ViewModel
-     */
     private ApiConfigViewModel viewModel;
-    
-    /**
-     * Provider adapter
-     */
     private ProviderAdapter providerAdapter;
     
     @Override
@@ -66,19 +51,15 @@ public class ApiConfigActivity extends AppCompatActivity implements ProviderAdap
         binding = ActivityApiConfigBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         
-        // Set up toolbar
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle(R.string.api_configuration);
         }
         
-        // Initialize ViewModel
         viewModel = new ViewModelProvider(this).get(ApiConfigViewModel.class);
         
-        // Initialize RecyclerView
         setupRecyclerView();
-        
-        // Observe data
+        setupFab();
         observeData();
     }
     
@@ -91,9 +72,6 @@ public class ApiConfigActivity extends AppCompatActivity implements ProviderAdap
         return super.onOptionsItemSelected(item);
     }
     
-    /**
-     * Set up the RecyclerView for providers
-     */
     private void setupRecyclerView() {
         providerAdapter = new ProviderAdapter(this, new ArrayList<>());
         providerAdapter.setOnProviderClickListener(this);
@@ -102,9 +80,10 @@ public class ApiConfigActivity extends AppCompatActivity implements ProviderAdap
         binding.recyclerViewProviders.setAdapter(providerAdapter);
     }
     
-    /**
-     * Observe LiveData from ViewModel
-     */
+    private void setupFab() {
+        binding.fabAddProvider.setOnClickListener(v -> showAddCustomProviderDialog());
+    }
+    
     private void observeData() {
         viewModel.getProviders().observe(this, providers -> {
             if (providers != null) {
@@ -119,30 +98,17 @@ public class ApiConfigActivity extends AppCompatActivity implements ProviderAdap
         });
     }
     
-    // =========================================================================
-    // ProviderAdapter.OnProviderClickListener
-    // =========================================================================
-    
     @Override
     public void onProviderClick(ProviderSettings provider) {
         showProviderConfigDialog(provider);
     }
     
-    /**
-     * Show configuration dialog for a provider
-     * 
-     * @param provider The provider to configure
-     */
     private void showProviderConfigDialog(ProviderSettings provider) {
-        // Create dialog view
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_provider_config, null);
         
-        TextInputLayout apiKeyLayout = dialogView.findViewById(R.id.layout_api_key);
         TextInputEditText apiKeyInput = dialogView.findViewById(R.id.input_api_key);
-        TextInputLayout apiHostLayout = dialogView.findViewById(R.id.layout_api_host);
         TextInputEditText apiHostInput = dialogView.findViewById(R.id.input_api_host);
         
-        // Set existing values
         if (provider.getApiKey() != null) {
             apiKeyInput.setText(provider.getApiKey());
         }
@@ -152,7 +118,6 @@ public class ApiConfigActivity extends AppCompatActivity implements ProviderAdap
             apiHostInput.setText(ProviderSettings.getDefaultHost(provider.getProvider()));
         }
         
-        // Show dialog
         new MaterialAlertDialogBuilder(this)
             .setTitle(provider.getDisplayName())
             .setView(dialogView)
@@ -165,7 +130,6 @@ public class ApiConfigActivity extends AppCompatActivity implements ProviderAdap
                     return;
                 }
                 
-                // Update provider settings
                 provider.setApiKey(apiKey);
                 provider.setApiHost(apiHost);
                 viewModel.saveProviderSettings(provider);
@@ -174,17 +138,48 @@ public class ApiConfigActivity extends AppCompatActivity implements ProviderAdap
             })
             .setNegativeButton(R.string.cancel, null)
             .setNeutralButton(R.string.test_connection, (dialog, which) -> {
-                // Test connection
                 testConnection(provider);
             })
             .show();
     }
     
-    /**
-     * Test API connection
-     * 
-     * @param provider The provider to test
-     */
+    private void showAddCustomProviderDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_custom_provider, null);
+        
+        TextInputEditText nameInput = dialogView.findViewById(R.id.input_provider_name);
+        TextInputEditText hostInput = dialogView.findViewById(R.id.input_api_host);
+        TextInputEditText keyInput = dialogView.findViewById(R.id.input_api_key);
+        TextInputEditText modelInput = dialogView.findViewById(R.id.input_default_model);
+        
+        new MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.add_custom_provider)
+            .setView(dialogView)
+            .setPositiveButton(R.string.save, (dialog, which) -> {
+                String name = nameInput.getText() != null ? nameInput.getText().toString().trim() : "";
+                String host = hostInput.getText() != null ? hostInput.getText().toString().trim() : "";
+                String key = keyInput.getText() != null ? keyInput.getText().toString().trim() : "";
+                String model = modelInput.getText() != null ? modelInput.getText().toString().trim() : "";
+                
+                if (name.isEmpty() || host.isEmpty() || key.isEmpty()) {
+                    Toast.makeText(this, R.string.error_provider_not_configured, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                
+                // Create custom provider with unique ID
+                String customId = "custom_" + UUID.randomUUID().toString().substring(0, 8);
+                ProviderSettings customProvider = new ProviderSettings(customId);
+                customProvider.setDisplayName(name);
+                customProvider.setApiHost(host);
+                customProvider.setApiKey(key);
+                customProvider.setDefaultModel(model.isEmpty() ? "gpt-3.5-turbo" : model);
+                
+                viewModel.saveProviderSettings(customProvider);
+                Toast.makeText(this, R.string.provider_configured, Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .show();
+    }
+    
     private void testConnection(ProviderSettings provider) {
         Toast.makeText(this, R.string.testing_connection, Toast.LENGTH_SHORT).show();
         

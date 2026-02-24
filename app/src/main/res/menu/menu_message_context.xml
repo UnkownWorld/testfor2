@@ -4,7 +4,14 @@
     
     This menu appears when long-pressing a message.
 -->
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Edit -->
+    <item
+        android:id="@+id/action_edit"
+        android:icon="@drawable/ic_edit"
+        android:title="@string/edit_message" />
 
     <!-- Copy -->
     <item

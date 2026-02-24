@@ -18,14 +18,6 @@ plugins {
     id 'com.android.application' version '8.2.2' apply false
 }
 
-// Define repositories for all sub-projects
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
 // Clean task to remove build directories
 task clean(type: Delete) {
     delete rootProject.buildDir

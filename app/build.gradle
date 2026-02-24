@@ -75,6 +75,13 @@ android {
             excludes += ['META-INF/DUMMY.SF', 'META-INF/DUMMY.RSA']
         }
     }
+    
+    // Configuration to exclude duplicate dependencies
+    configurations {
+        all {
+            exclude group: 'org.jetbrains', module: 'annotations-java5'
+        }
+    }
 }
 
 dependencies {
@@ -99,6 +106,9 @@ dependencies {
     
     // SwipeRefreshLayout for pull-to-refresh
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    
+    // Preference library for settings
+    implementation 'androidx.preference:preference:1.2.1'
 
     // =========================================================================
     // Architecture Components (MVVM)
