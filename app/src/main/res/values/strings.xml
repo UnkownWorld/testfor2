@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     String Resources for Chatbox App
-    
-    This file contains all user-facing strings in the application.
-    Organized by feature/screen for easy maintenance.
 -->
 <resources>
     
-    <!-- =====================================================================
-         App Information
-         ===================================================================== -->
+    <!-- App Information -->
     <string name="app_name">Chatbox</string>
     
-    <!-- =====================================================================
-         Common Actions
-         ===================================================================== -->
+    <!-- Common Actions -->
     <string name="new_chat">New Chat</string>
     <string name="send">Send</string>
     <string name="cancel">Cancel</string>
@@ -36,9 +29,7 @@
     <string name="search">Search</string>
     <string name="more_options">More options</string>
     
-    <!-- =====================================================================
-         Main Screen
-         ===================================================================== -->
+    <!-- Main Screen -->
     <string name="no_chats">No chats</string>
     <string name="no_chats_yet">No chats yet</string>
     <string name="tap_plus_to_start">Tap + to start a new chat</string>
@@ -57,9 +48,7 @@
     <string name="error_creating_session">Error creating session</string>
     <string name="search_coming_soon">Search coming soon</string>
     
-    <!-- =====================================================================
-         Chat Screen
-         ===================================================================== -->
+    <!-- Chat Screen -->
     <string name="type_message">Type a message…</string>
     <string name="message_sent">Message sent</string>
     <string name="message_copied">Message copied to clipboard</string>
@@ -80,9 +69,7 @@
     <string name="model_not_found">Model not found. Please check your settings.</string>
     <string name="context_too_long">Context too long. Please start a new chat.</string>
     
-    <!-- =====================================================================
-         Settings Screen
-         ===================================================================== -->
+    <!-- Settings Screen -->
     <string name="general_settings">General</string>
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
@@ -102,6 +89,9 @@
     <string name="default_model">Default Model</string>
     <string name="api_key">API Key</string>
     <string name="api_host">API Host</string>
+    <string name="api_path">API Path</string>
+    <string name="api_host_helper">e.g., https://api.example.com (without /v1/chat/completions)</string>
+    <string name="api_path_helper">Optional. Default: /chat/completions</string>
     <string name="api_key_hint">Enter your API key</string>
     <string name="api_host_hint">https://api.example.com</string>
     <string name="test_connection">Test Connection</string>
@@ -172,18 +162,14 @@
     <string name="retry_delay">Retry delay</string>
     <string name="milliseconds">%1$d ms</string>
     
-    <!-- =====================================================================
-         About
-         ===================================================================== -->
+    <!-- About -->
     <string name="about">About</string>
     <string name="version">Version</string>
     <string name="open_source_licenses">Open source licenses</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="terms_of_service">Terms of service</string>
     
-    <!-- =====================================================================
-         Errors
-         ===================================================================== -->
+    <!-- Errors -->
     <string name="error_generic">An error occurred</string>
     <string name="error_no_internet">No internet connection</string>
     <string name="error_timeout">Request timed out</string>
@@ -199,8 +185,6 @@
     <!-- Additional strings -->
     <string name="clear">Clear</string>
     <string name="testing_connection">Testing connection…</string>
-
-    <!-- Additional strings -->
     <string name="add_custom_provider">Add Custom Provider</string>
     <string name="edit_message">Edit Message</string>
     <string name="language_chinese">简体中文</string>
@@ -225,7 +209,6 @@
     <string name="streaming_response">Streaming Response</string>
     <string name="streaming_response_hint">Show response as it generates</string>
     <string name="create_chat">Create Chat</string>
-    <string name="no_provider_configured">No provider configured</string>
     <string name="please_configure_provider">Please configure at least one API provider in Settings.</string>
     <string name="use_last_settings">Use last settings</string>
     <string name="default_model_for_provider">Default model for %1$s</string>

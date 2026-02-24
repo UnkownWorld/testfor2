@@ -3,6 +3,7 @@ package com.chatbox.app.api;
 import android.util.Log;
 
 import com.chatbox.app.data.entity.ProviderSettings;
+import com.chatbox.app.utils.ApiUrlUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -68,6 +69,7 @@ public class ModelsService {
             case ProviderSettings.PROVIDER_XAI:
             case ProviderSettings.PROVIDER_DEEPSEEK:
             case ProviderSettings.PROVIDER_SILICONFLOW:
+            case ProviderSettings.PROVIDER_CUSTOM:
                 models = fetchOpenAICompatibleModels(apiHost, apiKey);
                 break;
                 
@@ -102,31 +104,12 @@ public class ModelsService {
         return models;
     }
     
-    private String normalizeApiHost(String apiHost) {
-        if (apiHost == null) return "";
-        
-        // 移除末尾斜杠
-        String url = apiHost.trim();
-        while (url.endsWith("/")) {
-            url = url.substring(0, url.length() - 1);
-        }
-        
-        return url;
-    }
-    
+    /**
+     * Fetch models from OpenAI-compatible API
+     */
     private List<String> fetchOpenAICompatibleModels(String apiHost, String apiKey) throws IOException {
-        String url = normalizeApiHost(apiHost);
-        
-        // 构建模型列表URL - 直接使用 /models 或 /v1/models
-        if (!url.endsWith("/models")) {
-            if (url.contains("/v1")) {
-                // URL已经包含/v1，直接添加/models
-                url = url + "/models";
-            } else {
-                // URL不包含/v1，添加/v1/models
-                url = url + "/v1/models";
-            }
-        }
+        // 使用 ApiUrlUtils 获取正确的模型列表 URL
+        String url = ApiUrlUtils.getModelsUrl(apiHost);
         
         Log.d(TAG, "Fetching models from: " + url);
         
@@ -182,7 +165,6 @@ public class ModelsService {
                 return models;
             }
             
-            // 如果都没有，返回空列表
             Log.w(TAG, "No models found in response");
             return new ArrayList<>();
         }
@@ -236,7 +218,13 @@ public class ModelsService {
         if (apiHost == null || apiHost.isEmpty()) {
             apiHost = "http://localhost:11434";
         }
-        String url = normalizeApiHost(apiHost) + "/api/tags";
+        
+        // 移除末尾斜杠
+        if (apiHost.endsWith("/")) {
+            apiHost = apiHost.substring(0, apiHost.length() - 1);
+        }
+        
+        String url = apiHost + "/api/tags";
         
         Log.d(TAG, "Fetching Ollama models from: " + url);
         

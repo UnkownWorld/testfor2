@@ -106,6 +106,7 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
         
         TextInputEditText apiKeyInput = dialogView.findViewById(R.id.input_api_key);
         TextInputEditText apiHostInput = dialogView.findViewById(R.id.input_api_host);
+        TextInputEditText apiPathInput = dialogView.findViewById(R.id.input_api_path);
         
         if (provider.getApiKey() != null) {
             apiKeyInput.setText(provider.getApiKey());
@@ -114,6 +115,9 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
             apiHostInput.setText(provider.getApiHost());
         } else {
             apiHostInput.setText(ProviderSettings.getDefaultHost(provider.getProvider()));
+        }
+        if (provider.getApiPath() != null && !provider.getApiPath().isEmpty()) {
+            apiPathInput.setText(provider.getApiPath());
         }
         
         new MaterialAlertDialogBuilder(this)
@@ -124,6 +128,8 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                     apiKeyInput.getText().toString().trim() : "";
                 String apiHost = apiHostInput.getText() != null ? 
                     apiHostInput.getText().toString().trim() : "";
+                String apiPath = apiPathInput.getText() != null ? 
+                    apiPathInput.getText().toString().trim() : "";
                 
                 if (apiKey.isEmpty()) {
                     Toast.makeText(this, R.string.error_provider_not_configured, Toast.LENGTH_SHORT).show();
@@ -132,6 +138,7 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                 
                 provider.setApiKey(apiKey);
                 provider.setApiHost(apiHost);
+                provider.setApiPath(apiPath);
                 viewModel.saveProviderSettings(provider);
                 
                 // 保存后立即打开模型选择对话框
@@ -144,10 +151,13 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                     apiKeyInput.getText().toString().trim() : "";
                 String apiHost = apiHostInput.getText() != null ? 
                     apiHostInput.getText().toString().trim() : "";
+                String apiPath = apiPathInput.getText() != null ? 
+                    apiPathInput.getText().toString().trim() : "";
                 
                 if (!apiKey.isEmpty()) {
                     provider.setApiKey(apiKey);
                     provider.setApiHost(apiHost);
+                    provider.setApiPath(apiPath);
                     viewModel.saveProviderSettings(provider);
                 }
                 
@@ -311,6 +321,7 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
         
         TextInputEditText nameInput = dialogView.findViewById(R.id.input_provider_name);
         TextInputEditText hostInput = dialogView.findViewById(R.id.input_api_host);
+        TextInputEditText pathInput = dialogView.findViewById(R.id.input_api_path);
         TextInputEditText keyInput = dialogView.findViewById(R.id.input_api_key);
         TextInputEditText modelInput = dialogView.findViewById(R.id.input_default_model);
         
@@ -320,6 +331,7 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
             .setPositiveButton(R.string.save, (dialog, which) -> {
                 String name = nameInput.getText() != null ? nameInput.getText().toString().trim() : "";
                 String host = hostInput.getText() != null ? hostInput.getText().toString().trim() : "";
+                String path = pathInput.getText() != null ? pathInput.getText().toString().trim() : "";
                 String key = keyInput.getText() != null ? keyInput.getText().toString().trim() : "";
                 String model = modelInput.getText() != null ? modelInput.getText().toString().trim() : "";
                 
@@ -332,6 +344,7 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                 ProviderSettings customProvider = new ProviderSettings(customId);
                 customProvider.setDisplayName(name);
                 customProvider.setApiHost(host);
+                customProvider.setApiPath(path);
                 customProvider.setApiKey(key);
                 customProvider.setDefaultModel(model.isEmpty() ? "gpt-4o-mini" : model);
                 

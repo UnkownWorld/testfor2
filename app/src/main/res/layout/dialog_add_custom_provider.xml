@@ -3,6 +3,7 @@
     Add Custom Provider Dialog Layout
     
     This layout is used for adding a custom API provider.
+    Supports apiHost + apiPath configuration.
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -36,10 +37,32 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="@string/api_host"
+        app:helperText="@string/api_host_helper"
+        app:helperTextEnabled="true"
         app:endIconMode="clear_text">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/input_api_host"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textUri"
+            android:maxLines="1" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- API Path (Optional) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/layout_api_path"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="@string/api_path"
+        app:helperText="@string/api_path_helper"
+        app:helperTextEnabled="true"
+        app:endIconMode="clear_text">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/input_api_path"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textUri"
