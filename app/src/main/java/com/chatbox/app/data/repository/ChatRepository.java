@@ -133,6 +133,17 @@ public class ChatRepository {
      * Send a message and get AI response
      */
     public void sendMessage(String sessionId, String content, ChatCallback callback) {
+        sendMessageWithFile(sessionId, content, content, callback);
+    }
+    
+    /**
+     * Send a message with file content
+     * @param sessionId Session ID
+     * @param displayContent Content to display in UI (user input only)
+     * @param apiContent Content to send to API (user input + file content)
+     * @param callback Callback for the operation
+     */
+    public void sendMessageWithFile(String sessionId, String displayContent, String apiContent, ChatCallback callback) {
         executor.execute(() -> {
             try {
                 // Check if OpenAI service is initialized
@@ -154,12 +165,12 @@ public class ChatRepository {
                     return;
                 }
                 
-                // Create user message
+                // Create user message - use displayContent for UI
                 Message userMessage = new Message();
                 userMessage.setId(UUID.randomUUID().toString());
                 userMessage.setSessionId(sessionId);
                 userMessage.setRole(Message.ROLE_USER);
-                userMessage.setContent(content);
+                userMessage.setContent(displayContent); // Only show user input in UI
                 userMessage.setTimestamp(System.currentTimeMillis());
                 userMessage.setUpdatedAt(System.currentTimeMillis());
                 
@@ -181,8 +192,8 @@ public class ChatRepository {
                 
                 messageDao.insert(assistantMessage);
                 
-                // Build request
-                ChatRequest request = buildChatRequest(session, content);
+                // Build request - use apiContent for API (includes file content)
+                ChatRequest request = buildChatRequest(session, apiContent);
                 
                 Log.d(TAG, "Sending request to API: model=" + session.getModel() + ", provider=" + session.getProvider());
                 

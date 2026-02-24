@@ -7,9 +7,7 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -174,6 +172,15 @@ public class FileContentManager {
     }
     
     /**
+     * 设置自定义分割器（用于按行/字符分割）
+     * @param customSplitter 自定义分割器
+     * @param param 分割参数（行数或字符数）
+     */
+    public void setCustomSplitter(FileSplitter customSplitter, int param) {
+        this.splitter = customSplitter;
+    }
+    
+    /**
      * 清除当前文件
      */
     public void clearFile() {
@@ -190,7 +197,7 @@ public class FileContentManager {
     }
     
     /**
-     * 获取当前文件的内容用于发送
+     * 获取当前文件的内容用于发送（只返回正文，不含批次前缀）
      * @param batchIndex 批次索引（-1表示发送全部）
      * @return 要发送的内容
      */
@@ -207,6 +214,7 @@ public class FileContentManager {
         if (splitter != null) {
             FileSplitter.Batch batch = splitter.getBatch(batchIndex);
             if (batch != null) {
+                // 只返回正文内容，不含批次前缀
                 return batch.getContent();
             }
         }

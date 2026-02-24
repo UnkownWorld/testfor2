@@ -3,6 +3,7 @@ package com.chatbox.app.ui.activities;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -45,6 +45,12 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
     private static final String TAG = "ChatActivity";
     public static final String EXTRA_SESSION_ID = "session_id";
     
+    // SharedPreferences keys
+    private static final String PREFS_NAME = "file_split_prefs";
+    private static final String KEY_LAST_REGEX = "last_regex";
+    private static final String KEY_LAST_BATCH_SIZE = "last_batch_size";
+    private static final String KEY_LAST_SPLIT_MODE = "last_split_mode";
+    
     private ActivityChatBinding binding;
     private ChatViewModel viewModel;
     private MessageAdapter messageAdapter;
@@ -55,6 +61,10 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
     private ActivityResultLauncher<String[]> filePickerLauncher;
     private int currentBatchIndex = 0;
     private int selectedBatchIndex = -1; // -1 means send all content
+    
+    // Split settings
+    private SharedPreferences splitPrefs;
+    private boolean hasPerformedSplit = false; // 是否已执行分割
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +90,9 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         
         viewModel = new ViewModelProvider(this).get(ChatViewModel.class);
         viewModel.setSessionId(sessionId);
+        
+        // Initialize preferences
+        splitPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         
         // Initialize file content manager
         fileContentManager = new FileContentManager(this);
@@ -219,11 +232,18 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             return;
         }
         
-        // Update UI
+        // Reset split state
+        hasPerformedSplit = false;
+        selectedBatchIndex = -1;
+        currentBatchIndex = 0;
+        
+        // Update UI - show file attached but don't split yet
         updateFileAttachmentUI(file);
         
-        // Perform initial split
-        performSplit();
+        // Show hint for user to configure split
+        binding.textSplitInfo.setVisibility(View.VISIBLE);
+        binding.textSplitInfo.setText(R.string.click_split_to_configure);
+        binding.buttonSelectBatch.setVisibility(View.GONE);
         
         Toast.makeText(this, R.string.file_attached, Toast.LENGTH_SHORT).show();
     }
@@ -243,7 +263,7 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
     }
     
     /**
-     * Perform content split
+     * Perform content split with current settings
      */
     private void performSplit() {
         FileSplitter splitter = fileContentManager.getSplitter();
@@ -251,7 +271,18 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             return;
         }
         
+        // Apply saved regex pattern if exists
+        String lastRegex = splitPrefs.getString(KEY_LAST_REGEX, "");
+        if (!lastRegex.isEmpty()) {
+            splitter.setSplitPattern(lastRegex);
+        }
+        
+        // Apply saved batch size
+        int lastBatchSize = splitPrefs.getInt(KEY_LAST_BATCH_SIZE, 5);
+        splitter.setBatchSize(lastBatchSize);
+        
         int segmentCount = splitter.split();
+        hasPerformedSplit = true;
         
         if (segmentCount <= 1) {
             binding.textSplitInfo.setVisibility(View.VISIBLE);
@@ -271,6 +302,7 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         fileContentManager.clearFile();
         selectedBatchIndex = -1;
         currentBatchIndex = 0;
+        hasPerformedSplit = false;
         binding.fileAttachmentLayout.setVisibility(View.GONE);
         Toast.makeText(this, R.string.file_removed, Toast.LENGTH_SHORT).show();
     }
@@ -292,10 +324,18 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             getString(R.string.split_by_regex)
         };
         
+        // Get last used mode
+        int lastMode = splitPrefs.getInt(KEY_LAST_SPLIT_MODE, 0);
+        
         new MaterialAlertDialogBuilder(this)
             .setTitle(R.string.split_options)
-            .setItems(options, (dialog, which) -> {
-                switch (which) {
+            .setSingleChoiceItems(options, lastMode, (dialog, which) -> {
+                // Save selected mode
+                splitPrefs.edit().putInt(KEY_LAST_SPLIT_MODE, which).apply();
+            })
+            .setPositiveButton(R.string.apply_split, (dialog, which) -> {
+                int selectedMode = splitPrefs.getInt(KEY_LAST_SPLIT_MODE, 0);
+                switch (selectedMode) {
                     case 0:
                         showChapterSplitOptions();
                         break;
@@ -310,6 +350,7 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
                         break;
                 }
             })
+            .setNegativeButton(R.string.cancel, null)
             .show();
     }
     
@@ -320,7 +361,10 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_message, null);
         TextInputEditText input = dialogView.findViewById(R.id.input_message_content);
         input.setHint(getString(R.string.batch_size) + " (default: 5)");
-        input.setText("5");
+        
+        // Use last saved batch size
+        int lastBatchSize = splitPrefs.getInt(KEY_LAST_BATCH_SIZE, 5);
+        input.setText(String.valueOf(lastBatchSize));
         
         new MaterialAlertDialogBuilder(this)
             .setTitle(R.string.split_by_chapter)
@@ -334,9 +378,15 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
                     batchSize = 5;
                 }
                 
+                // Save batch size
+                splitPrefs.edit().putInt(KEY_LAST_BATCH_SIZE, batchSize).apply();
+                
                 FileSplitter splitter = fileContentManager.getSplitter();
                 if (splitter != null) {
                     splitter.setBatchSize(batchSize);
+                    // Reset pattern to default chapter pattern
+                    splitter.setSplitPattern("第[零一二三四五六七八九十百千万\\d]+[章节回][^\n]*");
+                    splitPrefs.edit().putString(KEY_LAST_REGEX, "").apply();
                     performSplit();
                 }
             })
@@ -367,12 +417,16 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
                 
                 FileContentManager.FileAttachment file = fileContentManager.getCurrentFile();
                 if (file != null) {
-                    List<String> segments = FileSplitter.splitByLines(file.getContent(), lines);
-                    // Update splitter with new segments
-                    fileContentManager.clearFile();
-                    // Re-read and apply custom split
-                    // For simplicity, just show toast
-                    Toast.makeText(this, "Split into " + segments.size() + " segments", Toast.LENGTH_SHORT).show();
+                    // Create custom splitter for line-based split
+                    FileSplitter lineSplitter = new FileSplitter(file.getContent());
+                    lineSplitter.setBatchSize(1);
+                    fileContentManager.setCustomSplitter(lineSplitter, lines);
+                    hasPerformedSplit = true;
+                    
+                    int segmentCount = lineSplitter.split();
+                    binding.textSplitInfo.setVisibility(View.VISIBLE);
+                    binding.textSplitInfo.setText("按行分割: " + segmentCount + " 段");
+                    binding.buttonSelectBatch.setVisibility(segmentCount > 1 ? View.VISIBLE : View.GONE);
                 }
             })
             .setNegativeButton(R.string.cancel, null)
@@ -402,8 +456,16 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
                 
                 FileContentManager.FileAttachment file = fileContentManager.getCurrentFile();
                 if (file != null) {
-                    List<String> segments = FileSplitter.splitByCharacters(file.getContent(), chars);
-                    Toast.makeText(this, "Split into " + segments.size() + " segments", Toast.LENGTH_SHORT).show();
+                    // Create custom splitter for char-based split
+                    FileSplitter charSplitter = new FileSplitter(file.getContent());
+                    charSplitter.setBatchSize(1);
+                    fileContentManager.setCustomSplitter(charSplitter, chars);
+                    hasPerformedSplit = true;
+                    
+                    int segmentCount = charSplitter.split();
+                    binding.textSplitInfo.setVisibility(View.VISIBLE);
+                    binding.textSplitInfo.setText("按字符分割: " + segmentCount + " 段");
+                    binding.buttonSelectBatch.setVisibility(segmentCount > 1 ? View.VISIBLE : View.GONE);
                 }
             })
             .setNegativeButton(R.string.cancel, null)
@@ -411,13 +473,16 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
     }
     
     /**
-     * Show regex split options
+     * Show regex split options - with persistence
      */
     private void showRegexSplitOptions() {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_message, null);
         TextInputEditText input = dialogView.findViewById(R.id.input_message_content);
         input.setHint(getString(R.string.regex_pattern));
-        input.setText("第[零一二三四五六七八九十百千万\\d]+[章节回]");
+        
+        // Use last saved regex or default
+        String lastRegex = splitPrefs.getString(KEY_LAST_REGEX, "第[零一二三四五六七八九十百千万\\d]+[章节回]");
+        input.setText(lastRegex);
         
         new MaterialAlertDialogBuilder(this)
             .setTitle(R.string.split_by_regex)
@@ -425,10 +490,14 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             .setPositiveButton(R.string.apply_split, (dialog, which) -> {
                 String regex = input.getText() != null ? input.getText().toString().trim() : "";
                 if (!regex.isEmpty()) {
+                    // Save regex
+                    splitPrefs.edit().putString(KEY_LAST_REGEX, regex).apply();
+                    
                     FileSplitter splitter = fileContentManager.getSplitter();
                     if (splitter != null) {
                         splitter.setSplitPattern(regex);
                         performSplit();
+                        Toast.makeText(this, R.string.regex_saved, Toast.LENGTH_SHORT).show();
                     }
                 }
             })
@@ -440,6 +509,11 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
      * Show batch selection dialog
      */
     private void showBatchSelectionDialog() {
+        if (!hasPerformedSplit) {
+            Toast.makeText(this, R.string.please_split_first, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
         FileSplitter splitter = fileContentManager.getSplitter();
         if (splitter == null) {
             Toast.makeText(this, R.string.no_file_attached, Toast.LENGTH_SHORT).show();
@@ -452,14 +526,14 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             return;
         }
         
-        // Build batch names
+        // Build batch names - only show chapter titles, no prefix
         String[] batchNames = new String[batches.size() + 1];
         batchNames[0] = getString(R.string.send_all_content);
         for (int i = 0; i < batches.size(); i++) {
-            batchNames[i + 1] = getString(R.string.batch_format, i + 1, batches.get(i).getTitle());
+            batchNames[i + 1] = batches.get(i).getTitle();
         }
         
-        int currentIndex = selectedBatchIndex + 1; // +1 because "Send All" is at index 0
+        int currentIndex = selectedBatchIndex + 1;
         if (currentIndex < 0 || currentIndex >= batchNames.length) {
             currentIndex = 0;
         }
@@ -472,16 +546,14 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
                 selectedIndex[0] = which;
             })
             .setPositiveButton(R.string.ok, (dialog, which) -> {
-                selectedBatchIndex = selectedIndex[0] - 1; // -1 because "Send All" is at index 0
+                selectedBatchIndex = selectedIndex[0] - 1;
                 currentBatchIndex = Math.max(0, selectedBatchIndex);
                 
-                // Update UI to show selected batch
+                // Update UI to show selected batch title only
                 if (selectedBatchIndex >= 0) {
                     FileSplitter.Batch batch = splitter.getBatch(selectedBatchIndex);
                     if (batch != null) {
-                        binding.textSplitInfo.setText(
-                            getString(R.string.batch_format, selectedBatchIndex + 1, batch.getTitle())
-                        );
+                        binding.textSplitInfo.setText(batch.getTitle());
                     }
                 } else {
                     binding.textSplitInfo.setText(fileContentManager.getSplitInfo());
@@ -492,40 +564,33 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
     }
     
     private void sendMessage() {
-        String content = binding.editMessage.getText().toString().trim();
+        String userContent = binding.editMessage.getText().toString().trim();
         
         // Check if there's a file attached
+        String fileContent = null;
         if (fileContentManager.hasFile()) {
-            String fileContent = fileContentManager.getContentForSending(selectedBatchIndex);
-            if (fileContent != null) {
-                String fileName = fileContentManager.getCurrentFile().getFileName();
-                
-                if (selectedBatchIndex >= 0) {
-                    // Send specific batch
-                    FileSplitter splitter = fileContentManager.getSplitter();
-                    if (splitter != null) {
-                        FileSplitter.Batch batch = splitter.getBatch(selectedBatchIndex);
-                        if (batch != null) {
-                            content = getString(R.string.batch_content_prefix,
-                                selectedBatchIndex + 1, splitter.getBatchCount(), batch.getTitle())
-                                + fileContent + "\n\n" + content;
-                        }
-                    }
-                } else {
-                    // Send all content
-                    content = getString(R.string.file_content_prefix, fileName)
-                        + fileContent + "\n\n" + content;
-                }
-            }
+            fileContent = fileContentManager.getContentForSending(selectedBatchIndex);
         }
         
-        if (content.isEmpty()) {
+        // User content is empty and no file
+        if (userContent.isEmpty() && fileContent == null) {
             return;
         }
         
         binding.editMessage.setText("");
         
-        viewModel.sendMessage(content, new ChatViewModel.SendCallback() {
+        // Build message: user content first, then file content
+        // File content is passed to API but not shown in conversation
+        String displayContent = userContent;
+        String apiContent = userContent;
+        
+        if (fileContent != null && !fileContent.isEmpty()) {
+            // Append file content after user content for API
+            apiContent = userContent + "\n\n" + fileContent;
+        }
+        
+        // Send message - displayContent shows in UI, apiContent goes to API
+        viewModel.sendMessageWithFile(displayContent, apiContent, new ChatViewModel.SendCallback() {
             @Override
             public void onChunk(String chunk) {}
             
@@ -542,9 +607,7 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
                         runOnUiThread(() -> {
                             FileSplitter.Batch batch = splitter.getBatch(currentBatchIndex);
                             if (batch != null) {
-                                binding.textSplitInfo.setText(
-                                    getString(R.string.batch_format, currentBatchIndex + 1, batch.getTitle())
-                                );
+                                binding.textSplitInfo.setText(batch.getTitle());
                             }
                         });
                     }

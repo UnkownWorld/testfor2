@@ -118,6 +118,16 @@ public class ChatViewModel extends AndroidViewModel {
      * Send a message
      */
     public void sendMessage(String content, SendCallback callback) {
+        sendMessageWithFile(content, content, callback);
+    }
+    
+    /**
+     * Send a message with file content
+     * @param displayContent Content to display in UI (user input only)
+     * @param apiContent Content to send to API (user input + file content)
+     * @param callback Callback for the operation
+     */
+    public void sendMessageWithFile(String displayContent, String apiContent, SendCallback callback) {
         if (sessionId == null) {
             String errorMsg = "会话未初始化";
             postError(errorMsg);
@@ -138,7 +148,8 @@ public class ChatViewModel extends AndroidViewModel {
         
         postLoading(true);
         
-        chatRepository.sendMessage(sessionId, content, new ChatRepository.ChatCallback() {
+        // Use displayContent for UI, apiContent for API
+        chatRepository.sendMessageWithFile(sessionId, displayContent, apiContent, new ChatRepository.ChatCallback() {
             @Override
             public void onStart() {
                 // Message sending started
