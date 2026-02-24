@@ -3,6 +3,8 @@ package com.chatbox.app.ui.activities;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -107,7 +109,11 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
         TextInputEditText apiKeyInput = dialogView.findViewById(R.id.input_api_key);
         TextInputEditText apiHostInput = dialogView.findViewById(R.id.input_api_host);
         TextInputEditText apiPathInput = dialogView.findViewById(R.id.input_api_path);
+        RadioGroup apiModeGroup = dialogView.findViewById(R.id.radio_api_mode);
+        RadioButton radioChat = dialogView.findViewById(R.id.radio_mode_chat);
+        RadioButton radioResponses = dialogView.findViewById(R.id.radio_mode_responses);
         
+        // Load existing settings
         if (provider.getApiKey() != null) {
             apiKeyInput.setText(provider.getApiKey());
         }
@@ -120,6 +126,14 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
             apiPathInput.setText(provider.getApiPath());
         }
         
+        // Set API mode
+        String apiMode = provider.getApiMode();
+        if (ProviderSettings.API_MODE_RESPONSES.equals(apiMode)) {
+            radioResponses.setChecked(true);
+        } else {
+            radioChat.setChecked(true);
+        }
+        
         new MaterialAlertDialogBuilder(this)
             .setTitle(provider.getDisplayName())
             .setView(dialogView)
@@ -130,6 +144,8 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                     apiHostInput.getText().toString().trim() : "";
                 String apiPath = apiPathInput.getText() != null ? 
                     apiPathInput.getText().toString().trim() : "";
+                String selectedMode = radioResponses.isChecked() ? 
+                    ProviderSettings.API_MODE_RESPONSES : ProviderSettings.API_MODE_CHAT;
                 
                 if (apiKey.isEmpty()) {
                     Toast.makeText(this, R.string.error_provider_not_configured, Toast.LENGTH_SHORT).show();
@@ -138,26 +154,28 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                 
                 provider.setApiKey(apiKey);
                 provider.setApiHost(apiHost);
-                provider.setApiPath(apiPath);
+                provider.setApiPath(apiPath.isEmpty() ? null : apiPath);
+                provider.setApiMode(selectedMode);
                 viewModel.saveProviderSettings(provider);
                 
-                // 保存后立即打开模型选择对话框
                 showModelSelectionDialog(provider);
             })
             .setNegativeButton(R.string.cancel, null)
             .setNeutralButton(R.string.select_models, (dialog, which) -> {
-                // 保存设置
                 String apiKey = apiKeyInput.getText() != null ? 
                     apiKeyInput.getText().toString().trim() : "";
                 String apiHost = apiHostInput.getText() != null ? 
                     apiHostInput.getText().toString().trim() : "";
                 String apiPath = apiPathInput.getText() != null ? 
                     apiPathInput.getText().toString().trim() : "";
+                String selectedMode = radioResponses.isChecked() ? 
+                    ProviderSettings.API_MODE_RESPONSES : ProviderSettings.API_MODE_CHAT;
                 
                 if (!apiKey.isEmpty()) {
                     provider.setApiKey(apiKey);
                     provider.setApiHost(apiHost);
-                    provider.setApiPath(apiPath);
+                    provider.setApiPath(apiPath.isEmpty() ? null : apiPath);
+                    provider.setApiMode(selectedMode);
                     viewModel.saveProviderSettings(provider);
                 }
                 
@@ -166,9 +184,6 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
             .show();
     }
     
-    /**
-     * 显示模型选择对话框
-     */
     private void showModelSelectionDialog(ProviderSettings provider) {
         DialogModelSelectionBinding dialogBinding = DialogModelSelectionBinding.inflate(getLayoutInflater());
         
@@ -176,7 +191,6 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
         dialogBinding.recyclerViewModels.setLayoutManager(new LinearLayoutManager(this));
         dialogBinding.recyclerViewModels.setAdapter(adapter);
         
-        // 加载已保存的模型
         Set<String> selectedModels = new HashSet<>();
         if (provider.getModelsJson() != null && !provider.getModelsJson().isEmpty()) {
             try {
@@ -191,7 +205,6 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
             }
         }
         
-        // 创建对话框
         MaterialAlertDialogBuilder dialogBuilder = new MaterialAlertDialogBuilder(this)
             .setTitle(R.string.select_models)
             .setView(dialogBinding.getRoot())
@@ -209,20 +222,17 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
         androidx.appcompat.app.AlertDialog dialog = dialogBuilder.create();
         dialog.show();
         
-        // 显示加载状态
         dialogBinding.progressBar.setVisibility(View.VISIBLE);
         dialogBinding.textLoading.setVisibility(View.VISIBLE);
         dialogBinding.textLoading.setText(R.string.fetching_models);
         dialogBinding.recyclerViewModels.setVisibility(View.GONE);
         
-        // 检查提供商是否已配置
         if (provider.getApiKey() == null || provider.getApiKey().isEmpty()) {
             dialogBinding.progressBar.setVisibility(View.GONE);
             dialogBinding.textLoading.setText(R.string.please_configure_provider);
             return;
         }
         
-        // 从API获取模型
         modelsService.fetchModels(provider, new ModelsService.ModelsCallback() {
             @Override
             public void onSuccess(List<String> models) {
@@ -234,7 +244,6 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                     if (models.isEmpty()) {
                         dialogBinding.textLoading.setText(R.string.no_models_found);
                         dialogBinding.textLoading.setVisibility(View.VISIBLE);
-                        // 加载默认模型
                         loadDefaultModels(adapter, provider, selectedModels);
                     } else {
                         adapter.setModels(models, selectedModels);
@@ -250,7 +259,6 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                     dialogBinding.textLoading.setText(getString(R.string.fetch_models_failed, error));
                     dialogBinding.textLoading.setVisibility(View.VISIBLE);
                     
-                    // 加载默认模型
                     loadDefaultModels(adapter, provider, selectedModels);
                     dialogBinding.recyclerViewModels.setVisibility(View.VISIBLE);
                     dialogBinding.textLoading.setVisibility(View.GONE);
@@ -258,7 +266,6 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
             }
         });
         
-        // 添加自定义模型按钮
         dialogBinding.btnAddModel.setOnClickListener(v -> {
             String customModel = dialogBinding.inputCustomModel.getText() != null ?
                 dialogBinding.inputCustomModel.getText().toString().trim() : "";
@@ -269,7 +276,6 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
             }
         });
         
-        // 刷新按钮
         dialogBinding.btnRefreshModels.setOnClickListener(v -> {
             dialogBinding.progressBar.setVisibility(View.VISIBLE);
             dialogBinding.textLoading.setText(R.string.fetching_models);
@@ -306,9 +312,6 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
         });
     }
     
-    /**
-     * 加载默认模型
-     */
     private void loadDefaultModels(ModelSelectionAdapter adapter, ProviderSettings provider, Set<String> selectedModels) {
         List<String> defaultModels = viewModel.getModelsForProvider(provider.getProvider());
         if (!defaultModels.isEmpty()) {
@@ -324,6 +327,9 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
         TextInputEditText pathInput = dialogView.findViewById(R.id.input_api_path);
         TextInputEditText keyInput = dialogView.findViewById(R.id.input_api_key);
         TextInputEditText modelInput = dialogView.findViewById(R.id.input_default_model);
+        RadioGroup apiModeGroup = dialogView.findViewById(R.id.radio_api_mode);
+        RadioButton radioChat = dialogView.findViewById(R.id.radio_mode_chat);
+        RadioButton radioResponses = dialogView.findViewById(R.id.radio_mode_responses);
         
         new MaterialAlertDialogBuilder(this)
             .setTitle(R.string.add_custom_provider)
@@ -334,6 +340,8 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                 String path = pathInput.getText() != null ? pathInput.getText().toString().trim() : "";
                 String key = keyInput.getText() != null ? keyInput.getText().toString().trim() : "";
                 String model = modelInput.getText() != null ? modelInput.getText().toString().trim() : "";
+                String selectedMode = radioResponses.isChecked() ? 
+                    ProviderSettings.API_MODE_RESPONSES : ProviderSettings.API_MODE_CHAT;
                 
                 if (name.isEmpty() || host.isEmpty() || key.isEmpty()) {
                     Toast.makeText(this, R.string.error_provider_not_configured, Toast.LENGTH_SHORT).show();
@@ -344,13 +352,13 @@ public class ApiConfigActivity extends AppCompatActivity implements com.chatbox.
                 ProviderSettings customProvider = new ProviderSettings(customId);
                 customProvider.setDisplayName(name);
                 customProvider.setApiHost(host);
-                customProvider.setApiPath(path);
+                customProvider.setApiPath(path.isEmpty() ? null : path);
                 customProvider.setApiKey(key);
+                customProvider.setApiMode(selectedMode);
                 customProvider.setDefaultModel(model.isEmpty() ? "gpt-4o-mini" : model);
                 
                 viewModel.saveProviderSettings(customProvider);
                 
-                // 保存后立即打开模型选择对话框
                 showModelSelectionDialog(customProvider);
             })
             .setNegativeButton(R.string.cancel, null)

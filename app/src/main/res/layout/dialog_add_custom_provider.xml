@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Add Custom Provider Dialog Layout
-    
-    This layout is used for adding a custom API provider.
-    Supports apiHost + apiPath configuration.
+    Supports apiHost + apiPath + apiMode configuration
 -->
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="24dp">
 
     <!-- Provider Name -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_provider_name"
+        style="@style/Widget.Chatbox.Input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/provider_name"
@@ -26,56 +25,89 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:maxLines="1" />
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- API Host -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_api_host"
+        style="@style/Widget.Chatbox.Input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:hint="@string/api_host"
         app:helperText="@string/api_host_helper"
-        app:helperTextEnabled="true"
-        app:endIconMode="clear_text">
+        app:helperTextEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/input_api_host"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textUri"
-            android:maxLines="1" />
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- API Mode Selection -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/api_mode"
+        android:textSize="14sp"
+        android:textColor="?android:textColorSecondary" />
+
+    <RadioGroup
+        android:id="@+id/radio_api_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radio_mode_chat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/api_mode_chat"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/radio_mode_responses"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/api_mode_responses" />
+
+    </RadioGroup>
 
     <!-- API Path (Optional) -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_api_path"
+        style="@style/Widget.Chatbox.Input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="@string/api_path"
         app:helperText="@string/api_path_helper"
-        app:helperTextEnabled="true"
-        app:endIconMode="clear_text">
+        app:helperTextEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/input_api_path"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textUri"
-            android:maxLines="1" />
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- API Key -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_api_key"
+        style="@style/Widget.Chatbox.Input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:hint="@string/api_key"
         app:endIconMode="password_toggle">
 
@@ -84,16 +116,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:maxLines="1" />
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Default Model -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_default_model"
+        style="@style/Widget.Chatbox.Input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:hint="@string/default_model"
         app:endIconMode="clear_text">
 
@@ -102,7 +135,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"
-            android:maxLines="1" />
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

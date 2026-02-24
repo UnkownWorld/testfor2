@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Provider Config Dialog Layout
-    
-    This layout displays the configuration dialog for a provider.
-    Supports apiHost + apiPath configuration.
+    Supports apiHost + apiPath + apiMode configuration
 -->
-
 <LinearLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -52,13 +49,45 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- API Mode Selection -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/api_mode"
+        android:textSize="14sp"
+        android:textColor="?android:textColorSecondary" />
+
+    <RadioGroup
+        android:id="@+id/radio_api_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radio_mode_chat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/api_mode_chat"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/radio_mode_responses"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/api_mode_responses" />
+
+    </RadioGroup>
+
     <!-- API Path Input (Optional) -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layout_api_path"
         style="@style/Widget.Chatbox.Input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:hint="@string/api_path"
         app:helperText="@string/api_path_helper"
         app:helperTextEnabled="true">

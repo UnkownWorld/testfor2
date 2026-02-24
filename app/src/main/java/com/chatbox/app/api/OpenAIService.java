@@ -77,6 +77,9 @@ public class OpenAIService {
         request.setStream(stream);
         
         String jsonBody = gson.toJson(request);
+        Log.d(TAG, "Request URL: " + url);
+        Log.d(TAG, "Request body: " + jsonBody);
+        
         RequestBody body = RequestBody.create(jsonBody, JSON);
         
         Request.Builder requestBuilder = new Request.Builder()
@@ -156,18 +159,43 @@ public class OpenAIService {
         } finally { try { reader.close(); } catch (IOException e) { } }
     }
     
+    /**
+     * Build the API URL using apiHost + apiPath
+     * Key logic: 
+     * - If user provides apiPath, use it directly (no auto /v1)
+     * - If no apiPath, auto add /v1/chat/completions
+     */
     private String buildApiUrl() {
         String apiHost = settings.getApiHost();
         String apiPath = settings.getApiPath();
-        if (apiHost == null || apiHost.isEmpty()) apiHost = ProviderSettings.getDefaultHost(settings.getProvider());
+        String apiMode = settings.getApiMode();
+        
+        if (apiHost == null || apiHost.isEmpty()) {
+            apiHost = ProviderSettings.getDefaultHost(settings.getProvider());
+        }
+        
+        // Azure special handling
         if (settings.isAzure()) {
             String endpoint = settings.getAzureEndpoint();
             String deployment = settings.getAzureDeploymentName();
             String apiVersion = settings.getAzureApiVersion();
-            if (endpoint != null && deployment != null)
+            if (endpoint != null && deployment != null) {
                 return endpoint + "/openai/deployments/" + deployment + "/chat/completions?api-version=" + apiVersion;
+            }
         }
-        return ApiUrlUtils.normalizeApiHostAndPath(apiHost, apiPath).getFullUrl();
+        
+        // Get default path based on apiMode
+        String defaultPath = ApiUrlUtils.getDefaultPathForMode(apiMode);
+        String defaultHost = ApiUrlUtils.getDefaultHostForMode(apiMode);
+        
+        // Normalize URL
+        ApiUrlUtils.ApiUrl normalized = ApiUrlUtils.normalizeApiHostAndPath(
+            apiHost, apiPath, defaultHost, defaultPath);
+        
+        String fullUrl = normalized.getFullUrl();
+        Log.d(TAG, "URL: apiHost=" + apiHost + ", apiPath=" + apiPath + ", apiMode=" + apiMode + " -> " + fullUrl);
+        
+        return fullUrl;
     }
     
     public void cancel() { if (currentCall != null && !currentCall.isCanceled()) currentCall.cancel(); }
