@@ -145,6 +145,26 @@ public class ApiConfigViewModel extends AndroidViewModel {
         settingsRepository.setProviderEnabled(provider, enabled);
     }
     
+    /**
+     * Save custom models for a provider
+     * 
+     * @param providerId Provider ID
+     * @param models List of model IDs
+     */
+    public void saveCustomModels(String providerId, List<String> models) {
+        settingsRepository.saveCustomModels(providerId, models);
+    }
+    
+    /**
+     * Get models for a provider
+     * 
+     * @param providerId Provider ID
+     * @return List of model IDs
+     */
+    public List<String> getModelsForProvider(String providerId) {
+        return settingsRepository.getModelsForProvider(providerId);
+    }
+    
     // =========================================================================
     // API Testing
     // =========================================================================

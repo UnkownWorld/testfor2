@@ -267,6 +267,75 @@ public class ChatViewModel extends AndroidViewModel {
     }
     
     // =========================================================================
+    // Session Update Operations
+    // =========================================================================
+    
+    /**
+     * Update session model
+     * 
+     * @param model The new model ID
+     */
+    public void updateSessionModel(String model) {
+        Session currentSession = chatRepository.getSession(sessionId);
+        if (currentSession != null) {
+            currentSession.setModel(model);
+            chatRepository.updateSession(currentSession);
+            // Re-initialize OpenAI service
+            initializeOpenAIService();
+        }
+    }
+    
+    /**
+     * Update session provider and model
+     * 
+     * @param provider The new provider ID
+     * @param model The new model ID
+     */
+    public void updateSessionProvider(String provider, String model) {
+        Session currentSession = chatRepository.getSession(sessionId);
+        if (currentSession != null) {
+            currentSession.setProvider(provider);
+            currentSession.setModel(model);
+            chatRepository.updateSession(currentSession);
+            // Re-initialize OpenAI service
+            initializeOpenAIService();
+        }
+    }
+    
+    // =========================================================================
+    // Provider Operations
+    // =========================================================================
+    
+    /**
+     * Get configured providers
+     * 
+     * @return List of configured providers
+     */
+    public List<ProviderSettings> getConfiguredProviders() {
+        return settingsRepository.getConfiguredProviders();
+    }
+    
+    /**
+     * Get models for a provider
+     * 
+     * @param providerId Provider ID
+     * @return List of model IDs
+     */
+    public List<String> getModelsForProvider(String providerId) {
+        return settingsRepository.getModelsForProvider(providerId);
+    }
+    
+    /**
+     * Get provider display name
+     * 
+     * @param providerId Provider ID
+     * @return Display name
+     */
+    public String getProviderDisplayName(String providerId) {
+        return settingsRepository.getProviderDisplayName(providerId);
+    }
+    
+    // =========================================================================
     // Settings Access
     // =========================================================================
     

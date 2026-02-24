@@ -4,8 +4,21 @@
     
     This menu appears in the toolbar of the ChatActivity.
 -->
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Switch Model -->
+    <item
+        android:id="@+id/action_switch_model"
+        android:title="@string/switch_model"
+        app:showAsAction="never" />
+
+    <!-- Switch Provider -->
+    <item
+        android:id="@+id/action_switch_provider"
+        android:title="@string/switch_provider"
+        app:showAsAction="never" />
 
     <!-- Clear Chat -->
     <item

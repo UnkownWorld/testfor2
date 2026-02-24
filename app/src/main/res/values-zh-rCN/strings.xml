@@ -234,4 +234,19 @@
 
     <string name="advanced_settings">高级设置</string>
 
+    <!-- 模型选择 -->
+    <string name="fetching_models">正在从API获取模型…</string>
+    <string name="add_custom_model">添加自定义模型</string>
+    <string name="refresh_models">从API刷新</string>
+    <string name="select_models">选择模型</string>
+    <string name="models_selected">已选择 %1$d 个模型</string>
+    <string name="no_models_found">未找到模型</string>
+    <string name="model_added">模型已添加</string>
+    <string name="switch_model">切换模型</string>
+    <string name="switch_provider">切换服务商</string>
+    <string name="current_model">当前：%1$s</string>
+    <string name="current_provider">服务商：%1$s</string>
+
+    <string name="add">添加</string>
+
 </resources>

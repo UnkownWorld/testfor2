@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,8 +19,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.chatbox.app.R;
 import com.chatbox.app.data.entity.Message;
+import com.chatbox.app.data.entity.ProviderSettings;
+import com.chatbox.app.data.entity.Session;
 import com.chatbox.app.databinding.ActivityChatBinding;
-import com.chatbox.app.databinding.DialogEditMessageBinding;
 import com.chatbox.app.ui.adapters.MessageAdapter;
 import com.chatbox.app.ui.viewmodels.ChatViewModel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -30,16 +32,6 @@ import java.util.List;
 
 /**
  * ChatActivity - Activity for chatting with AI
- * 
- * This activity displays a chat interface where users can:
- * - View message history
- * - Send new messages
- * - Receive AI responses
- * - Copy, edit and delete messages
- * 
- * @author Chatbox Team
- * @version 1.0.0
- * @since 2024
  */
 public class ChatActivity extends AppCompatActivity implements MessageAdapter.OnMessageClickListener {
     
@@ -124,6 +116,8 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
         viewModel.getSession().observe(this, session -> {
             if (session != null && getSupportActionBar() != null) {
                 getSupportActionBar().setTitle(session.getDisplayTitle());
+                // 更新副标题显示当前模型
+                updateSubtitle(session);
             }
         });
         
@@ -146,6 +140,16 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show();
             }
         });
+    }
+    
+    private void updateSubtitle(Session session) {
+        if (getSupportActionBar() != null) {
+            String provider = viewModel.getProviderDisplayName(session.getProvider());
+            String model = session.getModel();
+            if (provider != null && model != null) {
+                getSupportActionBar().setSubtitle(provider + " / " + model);
+            }
+        }
     }
     
     private void sendMessage() {
@@ -177,6 +181,93 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             .setPositiveButton(R.string.clear, (dialog, which) -> {
                 viewModel.clearMessages();
                 Toast.makeText(this, R.string.chat_cleared, Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .show();
+    }
+    
+    /**
+     * 显示切换模型对话框
+     */
+    private void showSwitchModelDialog() {
+        Session session = viewModel.getSession().getValue();
+        if (session == null) return;
+        
+        // 获取当前提供商的模型列表
+        List<String> models = viewModel.getModelsForProvider(session.getProvider());
+        if (models.isEmpty()) {
+            Toast.makeText(this, R.string.no_models_found, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        String[] modelArray = models.toArray(new String[0]);
+        int currentIndex = models.indexOf(session.getModel());
+        if (currentIndex < 0) currentIndex = 0;
+        
+        int[] selectedIndex = {currentIndex};
+        
+        new MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.switch_model)
+            .setSingleChoiceItems(modelArray, currentIndex, (dialog, which) -> {
+                selectedIndex[0] = which;
+            })
+            .setPositiveButton(R.string.save, (dialog, which) -> {
+                String newModel = models.get(selectedIndex[0]);
+                viewModel.updateSessionModel(newModel);
+                Toast.makeText(this, getString(R.string.current_model, newModel), Toast.LENGTH_SHORT).show();
+            })
+            .setNegativeButton(R.string.cancel, null)
+            .show();
+    }
+    
+    /**
+     * 显示切换提供商对话框
+     */
+    private void showSwitchProviderDialog() {
+        // 获取已配置的提供商列表
+        List<ProviderSettings> providers = viewModel.getConfiguredProviders();
+        if (providers.isEmpty()) {
+            Toast.makeText(this, R.string.no_provider_configured, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        Session session = viewModel.getSession().getValue();
+        String currentProvider = session != null ? session.getProvider() : "";
+        
+        List<String> providerNames = new ArrayList<>();
+        List<String> providerIds = new ArrayList<>();
+        int currentIndex = 0;
+        
+        for (int i = 0; i < providers.size(); i++) {
+            ProviderSettings p = providers.get(i);
+            providerNames.add(p.getDisplayName());
+            providerIds.add(p.getProvider());
+            if (p.getProvider().equals(currentProvider)) {
+                currentIndex = i;
+            }
+        }
+        
+        String[] providerArray = providerNames.toArray(new String[0]);
+        int[] selectedIndex = {currentIndex};
+        
+        new MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.switch_provider)
+            .setSingleChoiceItems(providerArray, currentIndex, (dialog, which) -> {
+                selectedIndex[0] = which;
+            })
+            .setPositiveButton(R.string.save, (dialog, which) -> {
+                String newProviderId = providerIds.get(selectedIndex[0]);
+                ProviderSettings newProvider = providers.get(selectedIndex[0]);
+                
+                // 获取新提供商的模型列表
+                List<String> models = viewModel.getModelsForProvider(newProviderId);
+                String defaultModel = models.isEmpty() ? "gpt-4o-mini" : models.get(0);
+                
+                // 更新会话的提供商和模型
+                viewModel.updateSessionProvider(newProviderId, defaultModel);
+                
+                Toast.makeText(this, getString(R.string.current_provider, newProvider.getDisplayName()), 
+                    Toast.LENGTH_SHORT).show();
             })
             .setNegativeButton(R.string.cancel, null)
             .show();
@@ -271,6 +362,12 @@ public class ChatActivity extends AppCompatActivity implements MessageAdapter.On
             return true;
         } else if (itemId == R.id.action_clear) {
             clearChat();
+            return true;
+        } else if (itemId == R.id.action_switch_model) {
+            showSwitchModelDialog();
+            return true;
+        } else if (itemId == R.id.action_switch_provider) {
+            showSwitchProviderDialog();
             return true;
         }
         

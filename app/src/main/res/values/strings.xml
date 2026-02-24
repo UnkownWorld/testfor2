@@ -232,4 +232,19 @@
 
     <string name="advanced_settings">Advanced Settings</string>
 
+    <!-- Model Selection -->
+    <string name="fetching_models">Fetching models from API…</string>
+    <string name="add_custom_model">Add custom model</string>
+    <string name="refresh_models">Refresh from API</string>
+    <string name="select_models">Select Models</string>
+    <string name="models_selected">%1$d models selected</string>
+    <string name="no_models_found">No models found</string>
+    <string name="model_added">Model added</string>
+    <string name="switch_model">Switch Model</string>
+    <string name="switch_provider">Switch Provider</string>
+    <string name="current_model">Current: %1$s</string>
+    <string name="current_provider">Provider: %1$s</string>
+
+    <string name="add">Add</string>
+
 </resources>

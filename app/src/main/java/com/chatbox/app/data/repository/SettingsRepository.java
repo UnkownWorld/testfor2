@@ -174,78 +174,233 @@ public class SettingsRepository {
     public List<String> getModelsForProvider(String providerId) {
         List<String> models = new java.util.ArrayList<>();
         
-        // Default models for each provider
+        // Check if provider has custom models saved
+        ProviderSettings settings = providerSettingsDao.getSettings(providerId);
+        if (settings != null && settings.getModelsJson() != null && !settings.getModelsJson().isEmpty()) {
+            // Parse custom models from JSON
+            try {
+                com.google.gson.Gson gson = new com.google.gson.Gson();
+                java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<List<String>>(){}.getType();
+                List<String> customModels = gson.fromJson(settings.getModelsJson(), type);
+                if (customModels != null && !customModels.isEmpty()) {
+                    return customModels;
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error parsing custom models", e);
+            }
+        }
+        
+        // Default models for each provider (updated with latest models)
         switch (providerId) {
             case ProviderSettings.PROVIDER_OPENAI:
+                // GPT-4 Series
                 models.add("gpt-4o");
                 models.add("gpt-4o-mini");
+                models.add("gpt-4o-2024-11-20");
+                models.add("gpt-4o-2024-08-06");
+                models.add("gpt-4o-2024-05-13");
                 models.add("gpt-4-turbo");
+                models.add("gpt-4-turbo-2024-04-09");
                 models.add("gpt-4");
+                models.add("gpt-4-32k");
+                // GPT-3.5 Series
                 models.add("gpt-3.5-turbo");
                 models.add("gpt-3.5-turbo-16k");
+                // o1 Series (Reasoning)
+                models.add("o1");
+                models.add("o1-mini");
+                models.add("o1-preview");
                 break;
             case ProviderSettings.PROVIDER_CLAUDE:
+                // Claude 3.5 Series (Latest)
                 models.add("claude-3-5-sonnet-20241022");
                 models.add("claude-3-5-haiku-20241022");
+                models.add("claude-3-5-sonnet-20240620");
+                // Claude 3 Series
                 models.add("claude-3-opus-20240229");
                 models.add("claude-3-sonnet-20240229");
                 models.add("claude-3-haiku-20240307");
                 break;
             case ProviderSettings.PROVIDER_GEMINI:
+                // Gemini 2.0 Series (Latest)
+                models.add("gemini-2.0-flash-exp");
+                models.add("gemini-2.0-flash-thinking-exp-1219");
+                // Gemini 1.5 Series
                 models.add("gemini-1.5-pro");
+                models.add("gemini-1.5-pro-002");
                 models.add("gemini-1.5-flash");
+                models.add("gemini-1.5-flash-002");
+                models.add("gemini-1.5-flash-8b");
+                // Gemini 1.0 Series
                 models.add("gemini-1.0-pro");
                 break;
             case ProviderSettings.PROVIDER_DEEPSEEK:
+                // DeepSeek V3
                 models.add("deepseek-chat");
+                models.add("deepseek-reasoner");
+                // DeepSeek Coder
                 models.add("deepseek-coder");
                 break;
             case ProviderSettings.PROVIDER_GROQ:
+                // Llama 3.3 Series
                 models.add("llama-3.3-70b-versatile");
+                models.add("llama-3.3-70b-specdec");
+                // Llama 3.2 Series
+                models.add("llama-3.2-90b-vision-preview");
+                models.add("llama-3.2-11b-vision-preview");
+                models.add("llama-3.2-3b-preview");
+                models.add("llama-3.2-1b-preview");
+                // Llama 3.1 Series
+                models.add("llama-3.1-405b-reasoning");
                 models.add("llama-3.1-70b-versatile");
                 models.add("llama-3.1-8b-instant");
+                // Other Models
                 models.add("mixtral-8x7b-32768");
                 models.add("gemma2-9b-it");
+                models.add("qwen-2.5-32b");
+                models.add("qwen-2.5-coder-32b");
                 break;
             case ProviderSettings.PROVIDER_MISTRAL:
-                models.add("mistral-large-latest");
-                models.add("mistral-medium-latest");
+                // Mistral Latest
+                models.add("mistral-large-2411");
+                models.add("mistral-large-2407");
                 models.add("mistral-small-latest");
-                models.add("open-mistral-nemo");
+                models.add("mistral-medium-latest");
+                // Codestral
+                models.add("codestral-2405");
                 models.add("codestral-latest");
+                // Open Models
+                models.add("open-mistral-nemo");
+                models.add("open-codestral-mamba");
+                models.add("ministral-8b-latest");
+                models.add("ministral-3b-latest");
+                // Pixtral
+                models.add("pixtral-12b");
+                models.add("pixtral-large-2411");
                 break;
             case ProviderSettings.PROVIDER_OLLAMA:
+                // Llama Series
+                models.add("llama3.3");
                 models.add("llama3.2");
+                models.add("llama3.2:1b");
                 models.add("llama3.1");
+                models.add("llama3.1:405b");
+                models.add("llama3.1:70b");
                 models.add("llama3");
-                models.add("mistral");
-                models.add("codellama");
+                // Qwen Series
                 models.add("qwen2.5");
+                models.add("qwen2.5:72b");
+                models.add("qwen2.5-coder");
+                models.add("qwq");
+                // Mistral Series
+                models.add("mistral");
+                models.add("mixtral");
+                models.add("codestral");
+                models.add("minicpm-v");
+                // DeepSeek
+                models.add("deepseek-r1");
+                models.add("deepseek-v2");
+                models.add("deepseek-coder-v2");
+                // Code Models
+                models.add("codellama");
+                models.add("starcoder2");
+                // Other
+                models.add("phi4");
+                models.add("phi3.5");
+                models.add("gemma2");
+                models.add("command-r");
                 break;
             case ProviderSettings.PROVIDER_XAI:
+                models.add("grok-2-1212");
+                models.add("grok-2-vision-1212");
                 models.add("grok-beta");
+                models.add("grok-vision-beta");
                 break;
             case ProviderSettings.PROVIDER_PERPLEXITY:
+                // Sonar Series
+                models.add("sonar");
+                models.add("sonar-pro");
+                models.add("sonar-reasoning");
+                models.add("sonar-reasoning-pro");
+                // Legacy
                 models.add("llama-3.1-sonar-small-128k-online");
                 models.add("llama-3.1-sonar-large-128k-online");
                 models.add("llama-3.1-sonar-huge-128k-online");
                 break;
             case ProviderSettings.PROVIDER_OPENROUTER:
+                // OpenAI
                 models.add("openai/gpt-4o");
                 models.add("openai/gpt-4o-mini");
+                models.add("openai/o1");
+                models.add("openai/o1-mini");
+                models.add("openai/o1-preview");
+                // Anthropic
                 models.add("anthropic/claude-3.5-sonnet");
+                models.add("anthropic/claude-3.5-haiku");
+                models.add("anthropic/claude-3-opus");
+                // Google
+                models.add("google/gemini-2.0-flash-exp");
                 models.add("google/gemini-pro-1.5");
+                models.add("google/gemini-flash-1.5");
+                // Meta
+                models.add("meta-llama/llama-3.3-70b-instruct");
+                models.add("meta-llama/llama-3.2-11b-vision-instruct");
+                models.add("meta-llama/llama-3.1-405b-instruct");
                 models.add("meta-llama/llama-3.1-70b-instruct");
+                // DeepSeek
+                models.add("deepseek/deepseek-chat");
+                models.add("deepseek/deepseek-reasoner");
+                models.add("deepseek/deepseek-coder");
+                // Qwen
+                models.add("qwen/qwen-2.5-72b-instruct");
+                models.add("qwen/qwen-2.5-coder-32b-instruct");
+                models.add("qwen/qwq-32b-preview");
+                // Mistral
+                models.add("mistralai/mistral-large");
+                models.add("mistralai/codestral-mamba");
+                // Other
+                models.add("x-ai/grok-beta");
+                models.add("perplexity/sonar-reasoning-pro");
+                break;
+            case ProviderSettings.PROVIDER_SILICONFLOW:
+                models.add("deepseek-ai/DeepSeek-V3");
+                models.add("deepseek-ai/DeepSeek-R1");
+                models.add("Qwen/Qwen2.5-72B-Instruct");
+                models.add("Qwen/Qwen2.5-32B-Instruct");
+                models.add("Qwen/Qwen2.5-Coder-32B-Instruct");
+                models.add("meta-llama/Llama-3.3-70B-Instruct");
+                models.add("meta-llama/Meta-Llama-3.1-405B-Instruct");
                 break;
             default:
                 // For custom providers, add some common models
+                models.add("gpt-4o");
                 models.add("gpt-4o-mini");
-                models.add("gpt-3.5-turbo");
                 models.add("claude-3-5-sonnet-20241022");
+                models.add("gemini-2.0-flash-exp");
+                models.add("deepseek-chat");
                 break;
         }
         
         return models;
+    }
+    
+    /**
+     * Save custom models for a provider
+     * 
+     * @param providerId Provider ID
+     * @param models List of model IDs
+     */
+    public void saveCustomModels(String providerId, List<String> models) {
+        executor.execute(() -> {
+            ProviderSettings settings = providerSettingsDao.getSettings(providerId);
+            if (settings != null) {
+                com.google.gson.Gson gson = new com.google.gson.Gson();
+                String modelsJson = gson.toJson(models);
+                settings.setModelsJson(modelsJson);
+                providerSettingsDao.update(settings);
+                Log.d(TAG, "Saved custom models for provider: " + providerId);
+            }
+        });
     }
     
     /**
