@@ -24,11 +24,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
-/**
- * OpenAIService - Service for OpenAI API communication
- * 
- * 支持 apiHost + apiPath 的配置方式
- */
 public class OpenAIService {
     
     private static final String TAG = "OpenAIService";
@@ -52,7 +47,6 @@ public class OpenAIService {
     private OkHttpClient createClient(int timeoutSeconds) {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-        
         return new OkHttpClient.Builder()
             .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
             .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
@@ -61,34 +55,28 @@ public class OpenAIService {
             .build();
     }
     
-    public void setSettings(ProviderSettings settings) {
-        this.settings = settings;
-    }
+    public void setSettings(ProviderSettings settings) { this.settings = settings; }
+    public ProviderSettings getSettings() { return settings; }
     
-    public ProviderSettings getSettings() {
-        return settings;
-    }
-    
-    /**
-     * Send a chat completion request (streaming)
-     */
     public void chatCompletion(ChatRequest request, ChatCallback callback) {
+        doRequest(request, true, callback);
+    }
+    
+    public void chatCompletionSync(ChatRequest request, ChatCallback callback) {
+        doRequest(request, false, callback);
+    }
+    
+    private void doRequest(ChatRequest request, boolean stream, ChatCallback callback) {
         if (settings == null || !settings.isConfigured()) {
             callback.onError("Provider not configured");
             return;
         }
         
-        // 构建完整 URL
         String url = buildApiUrl();
         String apiKey = settings.getApiKey();
-        
-        // Ensure streaming is enabled
-        request.setStream(true);
+        request.setStream(stream);
         
         String jsonBody = gson.toJson(request);
-        Log.d(TAG, "Request URL: " + url);
-        Log.d(TAG, "Request body: " + jsonBody);
-        
         RequestBody body = RequestBody.create(jsonBody, JSON);
         
         Request.Builder requestBuilder = new Request.Builder()
@@ -97,156 +85,94 @@ public class OpenAIService {
             .header("Content-Type", "application/json")
             .post(body);
         
-        // OpenRouter 需要额外的 headers
         if (url.contains("openrouter.ai")) {
             requestBuilder.header("HTTP-Referer", "https://chatboxai.app");
             requestBuilder.header("X-Title", "Chatbox AI");
         }
         
-        Request httpRequest = requestBuilder.build();
-        
         callback.onStart();
-        
-        currentCall = client.newCall(httpRequest);
+        currentCall = client.newCall(requestBuilder.build());
         currentCall.enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(TAG, "Request failed", e);
-                if (!call.isCanceled()) {
-                    callback.onError("Network error: " + e.getMessage());
-                }
+                if (!call.isCanceled()) callback.onError("Network error: " + e.getMessage());
             }
             
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     String errorBody = response.body() != null ? response.body().string() : "Unknown error";
-                    Log.e(TAG, "API error: " + response.code() + " - " + errorBody);
                     callback.onError("API error: " + response.code() + " - " + errorBody);
                     return;
                 }
-                
-                if (response.body() == null) {
-                    callback.onError("Empty response");
-                    return;
-                }
-                
-                handleStreamingResponse(response, callback);
+                if (response.body() == null) { callback.onError("Empty response"); return; }
+                if (stream) handleStreamingResponse(response, callback);
+                else handleSyncResponse(response, callback);
             }
         });
     }
     
-    /**
-     * Handle streaming SSE response
-     */
+    private void handleSyncResponse(Response response, ChatCallback callback) throws IOException {
+        String responseBody = response.body().string();
+        ChatResponse chatResponse = gson.fromJson(responseBody, ChatResponse.class);
+        if (chatResponse != null && chatResponse.getChoices() != null && !chatResponse.getChoices().isEmpty()) {
+            ChatResponse.Choice choice = chatResponse.getChoices().get(0);
+            if (choice.getMessage() != null) callback.onChunk(choice.getMessage().getContent());
+            callback.onComplete(chatResponse);
+        } else {
+            callback.onError("Invalid response");
+        }
+    }
+    
     private void handleStreamingResponse(Response response, ChatCallback callback) {
-        BufferedReader reader = new BufferedReader(
-            new InputStreamReader(response.body().byteStream())
-        );
-        
+        BufferedReader reader = new BufferedReader(new InputStreamReader(response.body().byteStream()));
         StringBuilder fullContent = new StringBuilder();
         ChatResponse finalResponse = new ChatResponse();
-        
         try {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("data: ")) {
                     String data = line.substring(6);
-                    
-                    if ("[DONE]".equals(data)) {
-                        break;
-                    }
-                    
+                    if ("[DONE]".equals(data)) break;
                     try {
                         ChatResponse chunk = gson.fromJson(data, ChatResponse.class);
-                        
                         if (chunk != null && chunk.getChoices() != null && !chunk.getChoices().isEmpty()) {
                             ChatResponse.Choice choice = chunk.getChoices().get(0);
                             ChatResponse.Delta delta = choice.getDelta();
-                            
                             if (delta != null && delta.getContent() != null) {
-                                String content = delta.getContent();
-                                fullContent.append(content);
-                                callback.onChunk(content);
+                                fullContent.append(delta.getContent());
+                                callback.onChunk(delta.getContent());
                             }
-                            
-                            if (choice.getFinishReason() != null) {
-                                finalResponse.setFinishReason(choice.getFinishReason());
-                            }
+                            if (choice.getFinishReason() != null) finalResponse.setFinishReason(choice.getFinishReason());
                         }
-                        
-                        if (chunk.getUsage() != null) {
-                            finalResponse.setUsage(chunk.getUsage());
-                        }
-                        
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error parsing chunk: " + data, e);
-                    }
+                        if (chunk.getUsage() != null) finalResponse.setUsage(chunk.getUsage());
+                    } catch (Exception e) { Log.e(TAG, "Parse error", e); }
                 }
             }
-            
             finalResponse.setContent(fullContent.toString());
             callback.onComplete(finalResponse);
-            
         } catch (IOException e) {
-            Log.e(TAG, "Error reading stream", e);
             callback.onError("Error reading response: " + e.getMessage());
-        } finally {
-            try {
-                reader.close();
-            } catch (IOException e) {
-                Log.e(TAG, "Error closing reader", e);
-            }
-        }
+        } finally { try { reader.close(); } catch (IOException e) { } }
     }
     
-    /**
-     * Build the API URL using apiHost + apiPath
-     */
     private String buildApiUrl() {
         String apiHost = settings.getApiHost();
         String apiPath = settings.getApiPath();
-        
-        // 如果 apiHost 为空，使用默认值
-        if (apiHost == null || apiHost.isEmpty()) {
-            apiHost = ProviderSettings.getDefaultHost(settings.getProvider());
-        }
-        
-        // Azure 使用不同的端点格式
+        if (apiHost == null || apiHost.isEmpty()) apiHost = ProviderSettings.getDefaultHost(settings.getProvider());
         if (settings.isAzure()) {
             String endpoint = settings.getAzureEndpoint();
             String deployment = settings.getAzureDeploymentName();
             String apiVersion = settings.getAzureApiVersion();
-            
-            if (endpoint != null && deployment != null) {
+            if (endpoint != null && deployment != null)
                 return endpoint + "/openai/deployments/" + deployment + "/chat/completions?api-version=" + apiVersion;
-            }
         }
-        
-        // 使用 ApiUrlUtils 规范化 URL
-        ApiUrlUtils.ApiUrl normalized = ApiUrlUtils.normalizeApiHostAndPath(apiHost, apiPath);
-        Log.d(TAG, "URL: apiHost=" + apiHost + ", apiPath=" + apiPath + " -> " + normalized.getFullUrl());
-        
-        return normalized.getFullUrl();
+        return ApiUrlUtils.normalizeApiHostAndPath(apiHost, apiPath).getFullUrl();
     }
     
-    /**
-     * Cancel the current API call
-     */
-    public void cancel() {
-        if (currentCall != null && !currentCall.isCanceled()) {
-            currentCall.cancel();
-            Log.d(TAG, "API call cancelled");
-        }
-    }
+    public void cancel() { if (currentCall != null && !currentCall.isCanceled()) currentCall.cancel(); }
+    public boolean isInProgress() { return currentCall != null && !currentCall.isCanceled() && !currentCall.isExecuted(); }
     
-    public boolean isInProgress() {
-        return currentCall != null && !currentCall.isCanceled() && !currentCall.isExecuted();
-    }
-    
-    /**
-     * Callback interface for chat operations
-     */
     public interface ChatCallback {
         void onStart();
         void onChunk(String chunk);

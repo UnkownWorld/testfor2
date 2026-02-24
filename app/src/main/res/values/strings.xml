@@ -100,6 +100,7 @@
     <string name="provider_configured">Provider configured</string>
     <string name="provider_not_configured">Provider not configured</string>
     <string name="no_providers_configured">No providers configured</string>
+    <string name="no_provider_configured">No provider configured</string>
     <string name="add_provider">Add Provider</string>
     <string name="edit_provider">Edit Provider</string>
     <string name="remove_provider">Remove Provider</string>
