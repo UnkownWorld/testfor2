@@ -6,6 +6,7 @@
     - Toolbar at the top
     - RecyclerView for messages
     - File attachment preview area
+    - Skill selection area
     - Input area at the bottom
 -->
 
@@ -50,9 +51,58 @@
             android:clipToPadding="false"
             android:padding="8dp"
             android:scrollbars="vertical"
-            app:layout_constraintBottom_toTopOf="@id/file_attachment_layout"
+            app:layout_constraintBottom_toTopOf="@id/skill_layout"
             app:layout_constraintTop_toTopOf="parent"
             tools:listitem="@layout/item_message_user" />
+
+        <!-- Skill Selection Area -->
+        
+        <LinearLayout
+            android:id="@+id/skill_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="?attr/colorSurfaceVariant"
+            android:padding="8dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/file_attachment_layout"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view_messages">
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_edit"
+                    app:tint="?attr/colorPrimary" />
+                
+                <TextView
+                    android:id="@+id/text_selected_skills"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+                
+                <ImageButton
+                    android:id="@+id/button_remove_skills"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_delete"
+                    android:contentDescription="@string/remove_skills"
+                    app:tint="?attr/colorError" />
+                
+            </LinearLayout>
+            
+        </LinearLayout>
 
         <!-- File Attachment Preview -->
         
@@ -65,7 +115,7 @@
             android:background="?attr/colorSurfaceVariant"
             android:padding="8dp"
             app:layout_constraintBottom_toTopOf="@id/input_layout"
-            app:layout_constraintTop_toBottomOf="@id/recycler_view_messages">
+            app:layout_constraintTop_toBottomOf="@id/skill_layout">
             
             <LinearLayout
                 android:layout_width="match_parent"
@@ -166,7 +216,20 @@
             android:padding="8dp"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <!-- File Selection Button - More Visible -->
+            <!-- Skill Selection Button -->
+            <Button
+                android:id="@+id/button_select_skills"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:text="@string/select_skills"
+                android:drawableStart="@drawable/ic_edit"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:layout_marginBottom="4dp"
+                android:minHeight="48dp" />
+
+            <!-- File Selection Button -->
             <Button
                 android:id="@+id/button_attach_file"
                 android:layout_width="match_parent"
@@ -231,7 +294,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@id/file_attachment_layout"
+            app:layout_constraintBottom_toTopOf="@id/skill_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

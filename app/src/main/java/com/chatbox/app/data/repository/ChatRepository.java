@@ -138,12 +138,21 @@ public class ChatRepository {
     
     /**
      * Send a message with file content
+     */
+    public void sendMessageWithFile(String sessionId, String displayContent, String apiContent, ChatCallback callback) {
+        sendMessageWithSystem(sessionId, displayContent, apiContent, "", callback);
+    }
+    
+    /**
+     * Send a message with file content and custom system prompt
      * @param sessionId Session ID
      * @param displayContent Content to display in UI (user input only)
      * @param apiContent Content to send to API (user input + file content)
+     * @param skillSystemPrompt Custom system prompt from skills (overrides session's system prompt)
      * @param callback Callback for the operation
      */
-    public void sendMessageWithFile(String sessionId, String displayContent, String apiContent, ChatCallback callback) {
+    public void sendMessageWithSystem(String sessionId, String displayContent, String apiContent, 
+                                      String skillSystemPrompt, ChatCallback callback) {
         executor.execute(() -> {
             try {
                 // Check if OpenAI service is initialized
@@ -193,7 +202,8 @@ public class ChatRepository {
                 messageDao.insert(assistantMessage);
                 
                 // Build request - use apiContent for API (includes file content)
-                ChatRequest request = buildChatRequest(session, apiContent);
+                // Use skillSystemPrompt if provided, otherwise use session's system prompt
+                ChatRequest request = buildChatRequest(session, apiContent, skillSystemPrompt);
                 
                 Log.d(TAG, "Sending request to API: model=" + session.getModel() + ", provider=" + session.getProvider());
                 
@@ -262,16 +272,24 @@ public class ChatRepository {
     
     /**
      * Build a chat request from session and user input
+     * @param session Session info
+     * @param userContent User content for API
+     * @param skillSystemPrompt Custom system prompt from skills (overrides session's system prompt)
      */
-    private ChatRequest buildChatRequest(Session session, String userContent) {
+    private ChatRequest buildChatRequest(Session session, String userContent, String skillSystemPrompt) {
         ChatRequest request = new ChatRequest();
         request.setModel(session.getModel());
         
         List<ChatRequest.Message> messages = new ArrayList<>();
         
-        // Add system message if exists
-        if (session.getSystemPrompt() != null && !session.getSystemPrompt().isEmpty()) {
-            messages.add(new ChatRequest.Message("system", session.getSystemPrompt()));
+        // Add system message - prefer skillSystemPrompt over session's system prompt
+        String systemPrompt = skillSystemPrompt;
+        if (systemPrompt == null || systemPrompt.isEmpty()) {
+            systemPrompt = session.getSystemPrompt();
+        }
+        
+        if (systemPrompt != null && !systemPrompt.isEmpty()) {
+            messages.add(new ChatRequest.Message("system", systemPrompt));
         }
         
         // Add conversation history (if max context messages is set)

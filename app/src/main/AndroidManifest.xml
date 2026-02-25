@@ -5,6 +5,7 @@
     This file declares the application's components, permissions,
     and other configuration required by the Android system.
 -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.chatbox.app">
@@ -19,13 +20,17 @@
     <!-- Network state permission for checking connectivity -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     
-    <!-- Read external storage for file attachments -->
+    <!-- Read external storage for file attachments (Android 12 and below) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" 
         android:maxSdkVersion="32" />
     
-    <!-- Write external storage for exporting chats -->
+    <!-- Write external storage for skill files (Android 9 and below) -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" 
         android:maxSdkVersion="28" />
+    
+    <!-- Manage external storage for skill files (Android 11+) -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
     
     <!-- Read media images for Android 13+ -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
@@ -42,6 +47,7 @@
     <!-- =========================================================================
          Application Declaration
          ========================================================================= -->
+    
     <application
         android:name=".ChatboxApplication"
         android:allowBackup="true"
@@ -53,6 +59,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Chatbox"
         android:usesCleartextTraffic="false"
+        android:requestLegacyExternalStorage="true"
         tools:targetApi="34">
 
         <!-- =====================================================================

@@ -128,6 +128,17 @@ public class ChatViewModel extends AndroidViewModel {
      * @param callback Callback for the operation
      */
     public void sendMessageWithFile(String displayContent, String apiContent, SendCallback callback) {
+        sendMessageWithSystem(displayContent, apiContent, "", callback);
+    }
+    
+    /**
+     * Send a message with file content and custom system prompt
+     * @param displayContent Content to display in UI (user input only)
+     * @param apiContent Content to send to API (user input + file content)
+     * @param systemPrompt Custom system prompt from skills
+     * @param callback Callback for the operation
+     */
+    public void sendMessageWithSystem(String displayContent, String apiContent, String systemPrompt, SendCallback callback) {
         if (sessionId == null) {
             String errorMsg = "会话未初始化";
             postError(errorMsg);
@@ -148,8 +159,8 @@ public class ChatViewModel extends AndroidViewModel {
         
         postLoading(true);
         
-        // Use displayContent for UI, apiContent for API
-        chatRepository.sendMessageWithFile(sessionId, displayContent, apiContent, new ChatRepository.ChatCallback() {
+        // Use displayContent for UI, apiContent for API, systemPrompt for system message
+        chatRepository.sendMessageWithSystem(sessionId, displayContent, apiContent, systemPrompt, new ChatRepository.ChatCallback() {
             @Override
             public void onStart() {
                 // Message sending started

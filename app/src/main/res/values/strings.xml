@@ -5,491 +5,303 @@
 
 <resources>
     
-    
     <!-- App Information -->
-    
     <string name="app_name">Chatbox</string>
     
     <!-- Common Actions -->
-    
     <string name="new_chat">New Chat</string>
-    
     <string name="send">Send</string>
-    
     <string name="cancel">Cancel</string>
-    
     <string name="save">Save</string>
-    
     <string name="delete">Delete</string>
-    
     <string name="edit">Edit</string>
-    
     <string name="rename">Rename</string>
-    
     <string name="copy">Copy</string>
-    
     <string name="share">Share</string>
-    
     <string name="settings">Settings</string>
-    
     <string name="back">Back</string>
-    
     <string name="close">Close</string>
-    
     <string name="done">Done</string>
-    
     <string name="ok">OK</string>
-    
     <string name="yes">Yes</string>
-    
     <string name="no">No</string>
-    
     <string name="retry">Retry</string>
-    
     <string name="loading">Loading…</string>
-    
     <string name="search">Search</string>
-    
     <string name="more_options">More options</string>
+    <string name="clear_all">Clear All</string>
+    <string name="move_to_position">Move to position %1$d</string>
+    <string name="position">Position %1$d</string>
     
     <!-- Main Screen -->
-    
     <string name="no_chats">No chats</string>
-    
     <string name="no_chats_yet">No chats yet</string>
-    
     <string name="tap_plus_to_start">Tap + to start a new chat</string>
-    
     <string name="no_messages_yet">No messages yet</string>
-    
     <string name="star">Star</string>
-    
     <string name="unstar">Unstar</string>
-    
     <string name="session_deleted">Session deleted</string>
-    
     <string name="session_renamed">Session renamed</string>
-    
     <string name="session_name">Session name</string>
-    
     <string name="rename_session">Rename Session</string>
-    
     <string name="delete_session">Delete Session</string>
-    
     <string name="delete_session_confirm">Delete "%1$s"?</string>
-    
     <string name="configure_api_first">Configure API First</string>
-    
     <string name="configure_api_message">Please configure your API settings before starting a chat.</string>
-    
     <string name="configure">Configure</string>
-    
     <string name="error_creating_session">Error creating session</string>
-    
     <string name="search_coming_soon">Search coming soon</string>
     
     <!-- Chat Screen -->
-    
     <string name="type_message">Type a message…</string>
-    
     <string name="message_sent">Message sent</string>
-    
     <string name="message_copied">Message copied to clipboard</string>
-    
     <string name="generating">Generating…</string>
-    
     <string name="regenerate">Regenerate</string>
-    
     <string name="stop_generating">Stop generating</string>
-    
     <string name="clear_chat">Clear chat</string>
-    
     <string name="clear_chat_confirm">Clear all messages in this chat?</string>
-    
     <string name="chat_cleared">Chat cleared</string>
-    
     <string name="copy_message">Copy message</string>
-    
     <string name="delete_message">Delete message</string>
-    
     <string name="message_deleted">Message deleted</string>
-    
     <string name="error_sending_message">Error sending message</string>
-    
     <string name="network_error">Network error. Please check your connection.</string>
-    
     <string name="api_error">API error. Please try again.</string>
-    
     <string name="rate_limit_error">Rate limit exceeded. Please wait a moment.</string>
-    
     <string name="invalid_api_key">Invalid API key. Please check your settings.</string>
-    
     <string name="model_not_found">Model not found. Please check your settings.</string>
-    
     <string name="context_too_long">Context too long. Please start a new chat.</string>
     
     <!-- Settings Screen -->
-    
     <string name="general_settings">General</string>
-    
     <string name="appearance">Appearance</string>
-    
     <string name="theme">Theme</string>
-    
     <string name="theme_light">Light</string>
-    
     <string name="theme_dark">Dark</string>
-    
     <string name="theme_system">System default</string>
-    
     <string name="dynamic_colors">Dynamic colors</string>
-    
     <string name="dynamic_colors_summary">Use colors from your wallpaper</string>
-    
     <string name="language">Language</string>
-    
     <string name="language_system">System default</string>
     
     <!-- API Settings -->
-    
     <string name="api_settings">API Settings</string>
-    
     <string name="api_configuration">API Configuration</string>
-    
     <string name="select_provider">Select Provider</string>
-    
     <string name="default_provider">Default Provider</string>
-    
     <string name="default_model">Default Model</string>
-    
     <string name="api_key">API Key</string>
-    
     <string name="api_host">API Host</string>
-    
     <string name="api_path">API Path</string>
-    
     <string name="api_host_helper">e.g., https://api.example.com (without /v1/chat/completions)</string>
-    
     <string name="api_path_helper">Optional. Leave empty for default path based on API Mode.</string>
-    
     <string name="api_key_hint">Enter your API key</string>
-    
     <string name="api_host_hint">https://api.example.com</string>
-    
     <string name="test_connection">Test Connection</string>
-    
     <string name="connection_successful">Connection successful!</string>
-    
     <string name="connection_failed">Connection failed</string>
-    
     <string name="provider_configured">Provider configured</string>
-    
     <string name="provider_not_configured">Provider not configured</string>
-    
     <string name="no_providers_configured">No providers configured</string>
-    
     <string name="no_provider_configured">No provider configured</string>
-    
     <string name="add_provider">Add Provider</string>
-    
     <string name="edit_provider">Edit Provider</string>
-    
     <string name="remove_provider">Remove Provider</string>
-    
     <string name="remove_provider_confirm">Remove configuration for %1$s?</string>
     
     <!-- API Mode -->
-    
     <string name="api_mode">API Mode</string>
-    
     <string name="api_mode_chat">OpenAI API Compatible</string>
-    
     <string name="api_mode_responses">OpenAI Responses API</string>
-    
     <string name="api_mode_chat_description">Classic API calling method, better compatibility, suitable for most GPT models</string>
-    
     <string name="api_mode_responses_description">New calling method, exclusively supports gpt-5-pro and o3-pro models</string>
     
     <!-- Provider Names -->
-    
     <string name="provider_openai">OpenAI</string>
-    
     <string name="provider_claude">Claude</string>
-    
     <string name="provider_gemini">Gemini</string>
-    
     <string name="provider_azure">Azure OpenAI</string>
-    
     <string name="provider_deepseek">DeepSeek</string>
-    
     <string name="provider_siliconflow">SiliconFlow</string>
-    
     <string name="provider_ollama">Ollama</string>
-    
     <string name="provider_groq">Groq</string>
-    
     <string name="provider_mistral">Mistral AI</string>
-    
     <string name="provider_lmstudio">LM Studio</string>
-    
     <string name="provider_perplexity">Perplexity</string>
-    
     <string name="provider_xai">xAI</string>
-    
     <string name="provider_openrouter">OpenRouter</string>
-    
     <string name="provider_custom">Custom</string>
     
     <!-- Chat Settings -->
-    
     <string name="chat_settings">Chat Settings</string>
-    
     <string name="message_display">Message Display</string>
-    
     <string name="show_timestamp">Show timestamps</string>
-    
     <string name="show_token_count">Show token count</string>
-    
     <string name="render_markdown">Render markdown</string>
-    
     <string name="code_highlighting">Code highlighting</string>
-    
     <string name="font_size">Font size</string>
-    
     <string name="font_size_small">Small</string>
-    
     <string name="font_size_medium">Medium</string>
-    
     <string name="font_size_large">Large</string>
     
     <!-- Behavior Settings -->
-    
     <string name="behavior">Behavior</string>
-    
     <string name="send_on_enter">Send on Enter</string>
-    
     <string name="auto_scroll">Auto-scroll to new messages</string>
-    
     <string name="streaming_responses">Streaming responses</string>
-    
     <string name="streaming_summary">Show responses as they are generated</string>
     
     <!-- Notification Settings -->
-    
     <string name="notifications">Notifications</string>
-    
     <string name="notifications_enabled">Enable notifications</string>
-    
     <string name="sound_enabled">Sound</string>
-    
     <string name="vibration_enabled">Vibration</string>
     
     <!-- Privacy Settings -->
-    
     <string name="privacy">Privacy</string>
-    
     <string name="analytics_enabled">Enable analytics</string>
-    
     <string name="crash_reporting">Crash reporting</string>
-    
     <string name="clear_data">Clear all data</string>
-    
     <string name="clear_data_confirm">This will delete all chats and settings. This action cannot be undone.</string>
-    
     <string name="data_cleared">All data cleared</string>
     
     <!-- Advanced Settings -->
-    
     <string name="advanced">Advanced</string>
-    
     <string name="timeout">API timeout</string>
-    
     <string name="timeout_seconds">%1$d seconds</string>
-    
     <string name="max_retries">Max retries</string>
-    
     <string name="retry_delay">Retry delay</string>
-    
     <string name="milliseconds">%1$d ms</string>
     
     <!-- About -->
-    
     <string name="about">About</string>
-    
     <string name="version">Version</string>
-    
     <string name="open_source_licenses">Open source licenses</string>
-    
     <string name="privacy_policy">Privacy policy</string>
-    
     <string name="terms_of_service">Terms of service</string>
     
     <!-- Errors -->
-    
     <string name="error_generic">An error occurred</string>
-    
     <string name="error_no_internet">No internet connection</string>
-    
     <string name="error_timeout">Request timed out</string>
-    
     <string name="error_unknown">Unknown error</string>
-    
     <string name="error_session_not_found">Session not found</string>
-    
     <string name="error_provider_not_configured">Provider not configured</string>
     
     <!-- Provider Status -->
-    
     <string name="status">Status</string>
-    
     <string name="configured">Configured</string>
-    
     <string name="not_configured">Not Configured</string>
 
     <!-- Additional strings -->
-    
     <string name="clear">Clear</string>
-    
     <string name="testing_connection">Testing connection…</string>
-    
     <string name="add_custom_provider">Add Custom Provider</string>
-    
     <string name="edit_message">Edit Message</string>
-    
     <string name="language_chinese">简体中文</string>
-    
     <string name="language_english">English</string>
-    
     <string name="message_updated">Message updated</string>
-    
     <string name="provider_name">Provider Name</string>
-    
     <string name="provider_name_hint">e.g., My API</string>
 
     <!-- New Chat Dialog -->
-    
     <string name="select_model">Select Model</string>
-    
     <string name="chat_name_optional">Chat Name (Optional)</string>
-    
     <string name="system_prompt">System Prompt</string>
-    
     <string name="system_prompt_hint">Set the AI behavior and personality</string>
-    
     <string name="temperature">Temperature</string>
-    
     <string name="temperature_hint">Controls randomness: 0 = focused, 2 = creative</string>
-    
     <string name="top_p">Top P</string>
-    
     <string name="top_p_hint">Nucleus sampling: 0.1 = focused, 1 = diverse</string>
-    
     <string name="max_context_messages">Max Context Messages</string>
-    
     <string name="max_context_hint">Number of previous messages to include</string>
-    
     <string name="max_tokens">Max Output Tokens</string>
-    
     <string name="max_tokens_hint">Maximum length of AI response</string>
-    
     <string name="streaming_response">Streaming Response</string>
-    
     <string name="streaming_response_hint">Show response as it generates</string>
-    
     <string name="create_chat">Create Chat</string>
-    
     <string name="please_configure_provider">Please configure at least one API provider in Settings.</string>
-    
     <string name="use_last_settings">Use last settings</string>
-    
     <string name="default_model_for_provider">Default model for %1$s</string>
-
     <string name="advanced_settings">Advanced Settings</string>
 
     <!-- Model Selection -->
-    
     <string name="fetching_models">Fetching models from API…</string>
-    
     <string name="add_custom_model">Add custom model</string>
-    
     <string name="refresh_models">Refresh from API</string>
-    
     <string name="select_models">Select Models</string>
-    
     <string name="models_selected">%1$d models selected</string>
-    
     <string name="no_models_found">No models found</string>
-    
     <string name="model_added">Model added</string>
-    
     <string name="switch_model">Switch Model</string>
-    
     <string name="switch_provider">Switch Provider</string>
-    
     <string name="current_model">Current: %1$s</string>
-    
     <string name="current_provider">Provider: %1$s</string>
-
     <string name="add">Add</string>
-
     <string name="fetch_models_failed">Failed to fetch models: %1$s</string>
-    
     <string name="please_select_at_least_one_model">Please select at least one model</string>
-
     <string name="error">Error</string>
 
     <!-- File Attachment -->
-    
     <string name="attach_file">Attach File</string>
-    
     <string name="remove_file">Remove File</string>
-    
     <string name="file_attached">File attached</string>
-    
     <string name="file_removed">File removed</string>
-    
     <string name="file_read_error">Error reading file</string>
-    
     <string name="unsupported_file_type">Unsupported file type</string>
-    
     <string name="split_options">Split Options</string>
-    
     <string name="select_batch">Select Batch</string>
-    
     <string name="no_file_attached">No file attached</string>
-    
     <string name="send_all_content">Send All Content</string>
-    
     <string name="send_current_batch">Send Current Batch</string>
-    
     <string name="batch_format">Batch %1$d: %2$s</string>
-    
     <string name="chapters_detected">%1$d chapters detected</string>
-    
     <string name="no_chapters_detected">No chapters detected</string>
-    
     <string name="split_by_chapter">Split by Chapter</string>
-    
     <string name="split_by_lines">Split by Lines</string>
-    
     <string name="split_by_chars">Split by Characters</string>
-    
     <string name="split_by_regex">Custom Regex</string>
-    
     <string name="batch_size">Batch Size</string>
-    
     <string name="lines_per_segment">Lines per Segment</string>
-    
     <string name="chars_per_segment">Characters per Segment</string>
-    
     <string name="regex_pattern">Regex Pattern</string>
-    
     <string name="apply_split">Apply</string>
-    
-    <!-- New strings for improved file handling -->
     <string name="click_split_to_configure">Click Split Options to configure</string>
     <string name="regex_saved">Regex pattern saved</string>
     <string name="please_split_first">Please configure split options first</string>
 
+    <!-- Skill Management -->
+    <string name="select_skills">Select Skills</string>
+    <string name="manage_skills">Manage Skills</string>
+    <string name="set_skill_folder">Set Skill Folder</string>
+    <string name="create_new_skill">Create New Skill</string>
+    <string name="skill_options">Skill Options</string>
+    <string name="skill_name">Skill Name</string>
+    <string name="skill_name_hint">File name will automatically include "skill"</string>
+    <string name="skill_content">Skill Content</string>
+    <string name="skill_content_hint">Enter the system prompt content for this skill</string>
+    <string name="skill_name_required">Skill name is required</string>
+    <string name="skill_created">Skill created successfully</string>
+    <string name="skill_create_error">Failed to create skill</string>
+    <string name="skill_updated">Skill updated successfully</string>
+    <string name="skill_update_error">Failed to update skill</string>
+    <string name="skill_deleted">Skill deleted</string>
+    <string name="skill_delete_error">Failed to delete skill</string>
+    <string name="delete_skill">Delete Skill</string>
+    <string name="delete_skill_confirm">Delete skill "%1$s"? This cannot be undone.</string>
+    <string name="view_skill">View Skill</string>
+    <string name="edit_skill">Edit Skill</string>
+    <string name="no_skills_found">No Skills Found</string>
+    <string name="no_skills_message">No skill files found. Create a new skill or set a different folder.</string>
+    <string name="no_skills_selected">No skills selected</string>
+    <string name="skills_cleared">Skills cleared</string>
+    <string name="remove_skills">Remove Skills</string>
+    <string name="adjust_order">Adjust Order</string>
+    <string name="adjust_skill_order">Adjust Skill Order</string>
+    <string name="move_skill">Move Skill</string>
+    <string name="skill_folder_set">Skill folder set to: %1$s</string>
+    <string name="skill_folder_error">Failed to set skill folder</string>
+    <string name="storage_permission_denied">Storage permission denied. Some features may not work.</string>
 
 </resources>
